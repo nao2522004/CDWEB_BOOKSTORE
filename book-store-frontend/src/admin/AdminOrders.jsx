@@ -3,44 +3,41 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { adminAPI } from '../api';
 import {
   AdminPageHeader, AdminBtn, AdminTable, AdminSelect, StatusBadge,
-  AdminPagination, useAdminToast, AdminModal, FormField,
+  AdminPagination, useAdminToast,
 } from './AdminComponents';
 
 const ORDER_STATUS_MAP = {
-  PENDING:    { label: 'Chờ Xác Nhận', color: '#D97706' },
-  CONFIRMED:  { label: 'Đã Xác Nhận',  color: '#3B82F6' },
-  PROCESSING: { label: 'Đang Xử Lý',   color: '#8B5CF6' },
-  SHIPPED:    { label: 'Đang Giao',     color: '#06B6D4' },
-  DELIVERED:  { label: 'Đã Giao',       color: '#10B981' },
-  CANCELLED:  { label: 'Đã Huỷ',       color: '#EF4444' },
-  RETURNED:   { label: 'Trả Hàng',     color: '#F97316' },
-};
-const PAYMENT_STATUS_MAP = {
-  UNPAID:   { label: 'Chưa TT',   color: '#D97706' },
-  PAID:     { label: 'Đã TT',     color: '#10B981' },
-  REFUNDED: { label: 'Hoàn Tiền', color: '#8B5CF6' },
+  PENDING: { label: 'Chờ Xác Nhận', color: '#D97706' },
+  CONFIRMED: { label: 'Đã Xác Nhận', color: '#2563EB' },
+  PROCESSING: { label: 'Đang Xử Lý', color: '#7C3AED' },
+  SHIPPED: { label: 'Đang Giao', color: '#0891B2' },
+  DELIVERED: { label: 'Đã Giao', color: '#059669' },
+  CANCELLED: { label: 'Đã Huỷ Đơn', color: '#DC2626' },
+  RETURNED: { label: 'Trả Hàng', color: '#EA580C' },
 };
 
-// State machine transitions
-const NEXT_STATUSES = {
-  PENDING:    ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED:  ['PROCESSING', 'CANCELLED'],
-  PROCESSING: ['SHIPPED', 'CANCELLED'],
-  SHIPPED:    ['DELIVERED', 'RETURNED'],
-  DELIVERED:  [],
-  CANCELLED:  [],
-  RETURNED:   [],
+const PAYMENT_STATUS_MAP = {
+  UNPAID: { label: 'Chưa Thanh Toán', color: '#D97706' },
+  PAID: { label: 'Đã Thanh Toán', color: '#059669' },
+  REFUNDED: { label: 'Hoàn Tiền', color: '#7C3AED' },
 };
+
+const NEXT_STATUSES = {
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'RETURNED'],
+  DELIVERED: [], CANCELLED: [], RETURNED: [],
+};
+
 const NEXT_PAYMENT = {
-  UNPAID:   ['PAID'],
-  PAID:     ['REFUNDED'],
-  REFUNDED: [],
+  UNPAID: ['PAID'], PAID: ['REFUNDED'], REFUNDED: [],
 };
 
 const fmt = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 const fmtDate = (d) => d ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(d)) : '—';
 
-// ─── Orders List ──────────────────────────────────────────────────────────────
+//  ORDERS LIST 
 export default function AdminOrders() {
   const [orders, setOrders] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -62,53 +59,59 @@ export default function AdminOrders() {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const columns = [
-    { key: 'id', label: '#', width: '50px', render: v => <span className="font-mono text-[#C9922A] font-bold">{v}</span> },
+    {
+      key: 'id', label: 'MÃ ĐƠN', width: '80px',
+      render: v => <span className="font-mono text-[#8B6508] font-bold text-xs bg-[#8B6508]/5 px-2 py-0.5 rounded border border-[#8B6508]/10 shadow-3xs">#{v}</span>
+    },
     {
       key: 'recipientName',
-      label: 'Khách Hàng',
+      label: 'ĐỐI TÁC KHÁCH HÀNG',
       render: (v, row) => (
-        <div>
-          <p className="font-bold text-[#D4C4A8] text-xs">{v}</p>
-          <p className="text-[10px] text-[#6B5A3E] font-mono">{row.recipientPhone}</p>
+        <div className="py-0.5">
+          <p className="font-bold text-[#140E0A] text-xs" style={{ fontFamily: "'Playfair Display', serif" }}>{v}</p>
+          <p className="text-[10px] text-stone-400 font-mono mt-0.5 tracking-wide">{row.recipientPhone}</p>
         </div>
       )
     },
     {
       key: 'totalAmount',
-      label: 'Tổng Tiền',
-      render: v => <span className="font-mono font-bold text-[#C9922A] text-xs">{fmt(v)}</span>
+      label: 'GIÁ TRỊ ĐƠN',
+      render: v => <span className="font-mono font-bold text-[#8B6508] text-xs bg-stone-50 px-2 py-1 rounded border border-stone-100">{fmt(v)}</span>
     },
     {
-      key: 'status',
-      label: 'Đơn Hàng',
+      key: 'status', label: 'VẬN CHUYỂN',
       render: v => <StatusBadge status={v} map={ORDER_STATUS_MAP} />,
     },
     {
-      key: 'paymentStatus',
-      label: 'Thanh Toán',
+      key: 'paymentStatus', label: 'DÒNG TIỀN',
       render: v => <StatusBadge status={v} map={PAYMENT_STATUS_MAP} />,
     },
-    { key: 'createdAt', label: 'Ngày Tạo', render: v => <span className="text-[10px] text-[#6B5A3E] font-mono">{fmtDate(v)}</span> },
     {
-      key: '_actions',
-      label: '',
+      key: 'createdAt', label: 'THỜI ĐIỂM ĐẶT',
+      render: v => <span className="text-[11px] text-stone-500 font-mono">{fmtDate(v)}</span>
+    },
+    {
+      key: '_actions', label: 'QUẢN TRỊ',
       render: (_, row) => (
         <Link to={`/admin/orders/${row.id}`}>
-          <AdminBtn size="sm" variant="secondary">Chi Tiết</AdminBtn>
+          <AdminBtn size="sm" variant="secondary" className="hover:bg-stone-50 border-stone-300">
+            Chi Tiết
+          </AdminBtn>
         </Link>
       )
     }
   ];
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-xl shadow-xs border border-stone-200/60 my-4">
       <AdminPageHeader
-        title="Quản Lý Đơn Hàng"
-        subtitle={`${orders?.totalElements ?? 0} đơn hàng`}
+        title="Sổ Cái Đơn Hàng"
+        subtitle={`Quản lý toàn bộ hệ thống lưu chuyển gồm ${orders?.totalElements ?? 0} giao dịch`}
       />
 
-      <div className="flex gap-3 mb-4 flex-wrap">
-        <div className="w-48">
+      <div className="flex gap-3 mb-5 bg-white p-3 rounded-lg border border-stone-200/60 shadow-3xs flex-wrap items-center">
+        <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider pl-1">Lọc theo trạng thái vận hành:</span>
+        <div className="w-56">
           <AdminSelect
             value={statusFilter}
             onChange={v => { setStatusFilter(v); setPage(1); }}
@@ -118,14 +121,19 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      <AdminTable columns={columns} data={orders?.content} loading={loading} emptyMsg="Chưa có đơn hàng nào" />
-      <AdminPagination data={orders} page={page} onPageChange={setPage} />
+      <div className="bg-white rounded-lg border border-stone-200/60 shadow-3xs overflow-hidden">
+        <AdminTable columns={columns} data={orders?.content} loading={loading} emptyMsg="Hệ thống chưa ghi nhận đơn hàng nào phù hợp" />
+      </div>
+
+      <div className="mt-4">
+        <AdminPagination data={orders} page={page} onPageChange={setPage} />
+      </div>
       <Toasts />
     </div>
   );
 }
 
-// ─── Order Detail ─────────────────────────────────────────────────────────────
+//  ORDER DETAIL 
 export function AdminOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -150,9 +158,9 @@ export function AdminOrderDetail() {
     try {
       const res = await adminAPI.orders.updateStatus(id, status);
       setOrder(res.data);
-      toast('Cập nhật trạng thái thành công');
+      toast('Cập nhật trạng thái đơn hàng thành công');
     } catch (e) { toast(e.message, 'error'); }
-    finally { setUpdating(false); }
+    finally { setLoading(false); setUpdating(false); }
   };
 
   const updatePayment = async (paymentStatus) => {
@@ -160,147 +168,207 @@ export function AdminOrderDetail() {
     try {
       const res = await adminAPI.orders.updatePayment(id, paymentStatus);
       setOrder(res.data);
-      toast('Cập nhật thanh toán thành công');
+      toast('Cập nhật trạng thái dòng tiền thành công');
     } catch (e) { toast(e.message, 'error'); }
-    finally { setUpdating(false); }
+    finally { setLoading(false); setUpdating(false); }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-[#2A1F14] border-t-[#C9922A] rounded-full animate-spin" /></div>;
-  if (!order) return <p className="text-center py-20 text-[#6B5A3E] font-serif italic">Không tìm thấy đơn hàng</p>;
+  if (loading) return (
+    <div className="flex justify-center py-32 bg-[#FCFAF6] rounded-xl border border-stone-200/60 max-w-4xl mx-auto my-4">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-[#D4C4A8] border-t-[#8B6508] rounded-full animate-spin" />
+        <span className="text-xs text-stone-400 font-serif italic" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Đang đối chiếu chứng từ...</span>
+      </div>
+    </div>
+  );
+
+  if (!order) return (
+    <div className="text-center py-20 bg-[#FCFAF6] rounded-xl border border-stone-200/60 max-w-4xl mx-auto my-4">
+      <p className="text-stone-400 font-serif italic text-base" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+        Chứng từ hoặc đơn hàng không tồn tại trên hệ thống dữ liệu
+      </p>
+      <AdminBtn variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/admin/orders')}>Quay lại danh sách</AdminBtn>
+    </div>
+  );
 
   const nextStatuses = NEXT_STATUSES[order.status] || [];
   const nextPayments = NEXT_PAYMENT[order.paymentStatus] || [];
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center gap-4 mb-6">
-        <AdminBtn variant="ghost" size="sm" onClick={() => navigate('/admin/orders')}>← Quay lại</AdminBtn>
-        <h1 className="text-lg font-bold text-[#FAF5EC]" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Đơn Hàng #{order.id}
-        </h1>
-        <StatusBadge status={order.status} map={ORDER_STATUS_MAP} />
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-xl shadow-xs border border-stone-200/60 my-4">
+      {/* Header Điều Hướng */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#D4C4A8]/40 pb-4">
+        <div className="flex items-center gap-3">
+          <AdminBtn variant="ghost" size="sm" className="hover:bg-stone-200/60 text-stone-600" onClick={() => navigate('/admin/orders')}>
+            ← Danh sách
+          </AdminBtn>
+          <h1 className="text-xl font-bold text-[#140E0A] tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Chi Tiết Đơn Hàng <span className="font-mono text-[#8B6508]">#{order.id}</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <StatusBadge status={order.status} map={ORDER_STATUS_MAP} />
+          <StatusBadge status={order.paymentStatus} map={PAYMENT_STATUS_MAP} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left: Items + Address */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* KHỐI TRÁI: DANH SÁCH VÀ ĐỊA CHỈ KHÁCH HÀNG */}
         <div className="lg:col-span-2 space-y-5">
-          {/* Order Items */}
-          <div className="bg-[#140D05] border border-[#2A1F14] p-5">
-            <h2 className="text-[10px] uppercase tracking-widest font-bold text-[#C9922A] mb-4" style={{ fontFamily: "'Cinzel', serif" }}>
-              📚 Danh Sách Sản Phẩm
+          {/* Danh Sách Ấn Phẩm */}
+          <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
+            <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
+            <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-stone-100 flex items-center gap-2"
+              style={{ fontFamily: "'Cinzel', serif" }}>
+              <span>📚</span> DANH MỤC ẤN PHẨM CUNG CẤP
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {order.items?.map(item => (
-                <div key={item.bookId} className="flex items-center justify-between py-2 border-b border-[#2A1F14] last:border-0">
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-[#D4C4A8]">{item.bookTitleSnapshot}</p>
-                    <p className="text-[10px] text-[#6B5A3E] font-mono mt-0.5">
-                      {item.quantity} × {fmt(item.unitPrice)}
+                <div key={item.bookId} className="flex items-start justify-between py-1 border-b border-stone-100 last:border-0 last:pb-0">
+                  <div className="flex-1 pr-4">
+                    <p className="text-sm font-bold text-[#140E0A] leading-snug" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      {item.bookTitleSnapshot}
+                    </p>
+                    <p className="text-[11px] text-stone-400 font-mono mt-1 bg-stone-50 inline-block px-1.5 py-0.5 rounded">
+                      SL: {item.quantity} × {fmt(item.unitPrice)}
                     </p>
                   </div>
-                  <span className="font-mono font-bold text-xs text-[#C9922A]">{fmt(item.unitPrice * item.quantity)}</span>
+                  <span className="font-mono font-bold text-xs text-[#140E0A] pt-0.5">
+                    {fmt(item.unitPrice * item.quantity)}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Shipping */}
-          <div className="bg-[#140D05] border border-[#2A1F14] p-5">
-            <h2 className="text-[10px] uppercase tracking-widest font-bold text-[#C9922A] mb-3" style={{ fontFamily: "'Cinzel', serif" }}>
-              📍 Địa Chỉ Giao Hàng
+          {/* Địa Chỉ Giao Nhận */}
+          <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
+            <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
+            <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-3 pb-1.5 border-b border-stone-100 flex items-center gap-2"
+              style={{ fontFamily: "'Cinzel', serif" }}>
+              <span>📍</span> THÔNG TIN ĐỊA CHỈ GIAO NHẬN
             </h2>
-            <p className="text-xs font-bold text-[#D4C4A8]">{order.recipientName}</p>
-            <p className="text-xs text-[#8A7355] font-mono mt-0.5">{order.recipientPhone}</p>
-            <p className="text-xs text-[#8A7355] mt-1 font-serif">{order.shippingAddress}</p>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-[#140E0A]" style={{ fontFamily: "'Cinzel', serif" }}>
+                {order.recipientName}
+              </p>
+              <p className="text-xs text-stone-500 font-mono bg-stone-50 inline-block px-1.5 py-0.5 rounded border border-stone-100 mt-1">{order.recipientPhone}</p>
+              <p className="text-xs text-stone-600 mt-2 leading-relaxed bg-stone-50/40 p-2.5 rounded border border-stone-100/60 font-serif" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {order.shippingAddress}
+              </p>
+            </div>
             {order.note && (
-              <p className="text-xs text-[#6B5A3E] italic mt-2 border-t border-[#2A1F14] pt-2">Ghi chú: {order.note}</p>
+              <div className="mt-3 bg-amber-50/40 border border-amber-100/70 p-2.5 rounded">
+                <p className="text-xs text-amber-800 italic font-serif" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                  <span className="font-sans font-bold not-italic text-[10px] text-amber-700 uppercase tracking-wide block mb-0.5">Bản ghi chú hệ thống:</span>
+                  "{order.note}"
+                </p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Right: Financials + Actions */}
+        {/* KHỐI PHẢI: BÁO CÁO TÀI CHÍNH + THAO TÁC CẬP NHẬT */}
         <div className="space-y-5">
-          {/* Summary */}
-          <div className="bg-[#140D05] border border-[#2A1F14] p-5">
-            <h2 className="text-[10px] uppercase tracking-widest font-bold text-[#C9922A] mb-4" style={{ fontFamily: "'Cinzel', serif" }}>
-              💰 Tài Chính
+          {/* Hóa đơn tài chính nhỏ */}
+          <div className="bg-[#FAF7F2] border border-[#D4C4A8]/80 p-5 relative rounded-lg shadow-2xs">
+            <div className="absolute inset-1 border border-[#8B6508]/5 rounded-md pointer-events-none" />
+            <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-[#D4C4A8]/40 flex items-center gap-2"
+              style={{ fontFamily: "'Cinzel', serif" }}>
+              <span>💰</span> HÓA ĐƠN ĐỐI SOÁT
             </h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-[#6B5A3E]">Tạm tính</span>
-                <span className="font-mono text-[#D4C4A8]">{fmt(order.subtotal)}</span>
+            <div className="space-y-2.5 text-xs">
+              <div className="flex justify-between text-stone-600">
+                <span>Tổng giá trị hàng</span>
+                <span className="font-mono text-stone-800 font-medium">{fmt(order.subtotal)}</span>
               </div>
               {order.discountAmount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-[#6B5A3E]">Giảm giá{order.couponCode ? ` (${order.couponCode})` : ''}</span>
-                  <span className="font-mono text-emerald-400">-{fmt(order.discountAmount)}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-stone-600 flex flex-col">
+                    <span>Chiết khấu mã</span>
+                    {order.couponCode && <span className="text-[10px] text-[#8B6508] font-mono font-bold">[{order.couponCode}]</span>}
+                  </span>
+                  <span className="font-mono text-emerald-700 font-bold">-{fmt(order.discountAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-[#6B5A3E]">Phí ship</span>
-                <span className="font-mono text-[#D4C4A8]">{order.shippingFee > 0 ? fmt(order.shippingFee) : 'Miễn phí'}</span>
+              <div className="flex justify-between text-stone-600">
+                <span>Phí vận chuyển</span>
+                <span className="font-mono text-stone-800 font-medium">{order.shippingFee > 0 ? fmt(order.shippingFee) : 'Miễn phí'}</span>
               </div>
-              <div className="flex justify-between border-t border-[#2A1F14] pt-2 mt-2 font-bold">
-                <span className="text-[#D4C4A8]">Tổng cộng</span>
-                <span className="font-mono text-[#C9922A]">{fmt(order.totalAmount)}</span>
+
+              <div className="flex justify-between items-baseline border-t border-[#D4C4A8]/60 pt-2.5 mt-2 font-bold">
+                <span className="text-[#140E0A] text-xs uppercase tracking-wide">Thực thu (Tổng)</span>
+                <span className="font-mono text-base text-[#8B6508]">{fmt(order.totalAmount)}</span>
               </div>
-              <div className="flex justify-between items-center pt-1">
-                <span className="text-[#6B5A3E]">Thanh toán</span>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={order.paymentStatus} map={PAYMENT_STATUS_MAP} />
-                  <span className="text-[10px] text-[#6B5A3E]">{order.paymentMethod}</span>
+
+              <div className="flex flex-col gap-1 border-t border-dashed border-[#D4C4A8]/40 pt-2.5 mt-2 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-stone-400">Phương thức:</span>
+                  <span className="text-stone-600 font-medium font-mono uppercase text-[10px] bg-stone-200/60 px-1 py-0.2 rounded">{order.paymentMethod}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Status Actions */}
-          <div className="bg-[#140D05] border border-[#2A1F14] p-5">
-            <h2 className="text-[10px] uppercase tracking-widest font-bold text-[#C9922A] mb-4" style={{ fontFamily: "'Cinzel', serif" }}>
-              ⚙️ Cập Nhật Trạng Thái
+          {/* Vận Hành Quy Trình (Cập Nhật Trạng Thái) */}
+          <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
+            <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
+            <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-stone-100 flex items-center gap-2"
+              style={{ fontFamily: "'Cinzel', serif" }}>
+              <span>⚙️</span> ĐIỀU HÀNH ĐƠN HÀNG
             </h2>
 
-            {nextStatuses.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-[10px] text-[#6B5A3E] mb-2">Chuyển sang:</p>
-                {nextStatuses.map(s => (
-                  <AdminBtn
-                    key={s}
-                    variant={s === 'CANCELLED' || s === 'RETURNED' ? 'danger' : 'primary'}
-                    size="sm"
-                    disabled={updating}
-                    onClick={() => updateStatus(s)}
-                    className="w-full justify-center"
-                  >
-                    {ORDER_STATUS_MAP[s]?.label}
-                  </AdminBtn>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[10px] text-[#6B5A3E] italic">Đơn hàng đã kết thúc</p>
-            )}
+            {/* Quy trình Vận đơn */}
+            <div>
+              <p className="text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-2">Quy trình xử lý đơn:</p>
+              {nextStatuses.length > 0 ? (
+                <div className="space-y-2">
+                  {nextStatuses.map(s => (
+                    <AdminBtn
+                      key={s}
+                      variant={s === 'CANCELLED' || s === 'RETURNED' ? 'danger' : 'primary'}
+                      size="sm"
+                      disabled={updating}
+                      onClick={() => updateStatus(s)}
+                      className="w-full justify-center shadow-3xs font-medium text-xs py-1.5"
+                    >
+                      Chuyển: {ORDER_STATUS_MAP[s]?.label}
+                    </AdminBtn>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-stone-50 p-2.5 rounded text-center border border-dashed border-stone-200">
+                  <p className="text-xs text-stone-400 font-serif italic" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    Vòng đời hoàn tất hoặc đơn đã huỷ
+                  </p>
+                </div>
+              )}
+            </div>
 
+            {/* Quy trình Dòng Tiền */}
             {nextPayments.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-[#2A1F14] space-y-2">
-                <p className="text-[10px] text-[#6B5A3E] mb-2">Thanh toán:</p>
-                {nextPayments.map(s => (
-                  <AdminBtn
-                    key={s}
-                    variant={s === 'REFUNDED' ? 'danger' : 'primary'}
-                    size="sm"
-                    disabled={updating}
-                    onClick={() => updatePayment(s)}
-                    className="w-full justify-center"
-                  >
-                    {PAYMENT_STATUS_MAP[s]?.label}
-                  </AdminBtn>
-                ))}
+              <div className="mt-4 pt-4 border-t border-stone-100">
+                <p className="text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-2">Đối soát dòng tiền:</p>
+                <div className="space-y-2">
+                  {nextPayments.map(s => (
+                    <AdminBtn
+                      key={s}
+                      variant={s === 'REFUNDED' ? 'danger' : 'primary'}
+                      size="sm"
+                      disabled={updating}
+                      onClick={() => updatePayment(s)}
+                      className="w-full justify-center border-amber-600/30 text-amber-900 bg-amber-50 hover:bg-amber-100 font-medium text-xs py-1.5"
+                    >
+                      Xác nhận: {PAYMENT_STATUS_MAP[s]?.label}
+                    </AdminBtn>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          <p className="text-[10px] text-[#6B5A3E] font-mono">
-            Tạo lúc: {fmtDate(order.createdAt)}
+          <p className="text-[10px] text-stone-400 font-mono text-right pr-1">
+            Khởi tạo hệ thống: {fmtDate(order.createdAt)}
           </p>
         </div>
       </div>
