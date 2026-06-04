@@ -7,19 +7,19 @@ import {
 } from './AdminComponents';
 
 const ORDER_STATUS_MAP = {
-  PENDING: { label: 'Chờ Xác Nhận', color: '#D97706' },
-  CONFIRMED: { label: 'Đã Xác Nhận', color: '#2563EB' },
-  PROCESSING: { label: 'Đang Xử Lý', color: '#7C3AED' },
-  SHIPPED: { label: 'Đang Giao', color: '#0891B2' },
-  DELIVERED: { label: 'Đã Giao', color: '#059669' },
-  CANCELLED: { label: 'Đã Huỷ Đơn', color: '#DC2626' },
-  RETURNED: { label: 'Trả Hàng', color: '#EA580C' },
+  PENDING: { label: 'Chờ Xác Nhận', colorClass: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  CONFIRMED: { label: 'Đã Xác Nhận', colorClass: 'bg-blue-100 text-blue-800 border-blue-200' },
+  PROCESSING: { label: 'Đang Xử Lý', colorClass: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+  SHIPPED: { label: 'Đang Giao', colorClass: 'bg-purple-100 text-purple-800 border-purple-200' },
+  DELIVERED: { label: 'Đã Giao', colorClass: 'bg-green-100 text-green-800 border-green-200' },
+  CANCELLED: { label: 'Đã Huỷ Đơn', colorClass: 'bg-red-100 text-red-700 border-red-200' },
+  RETURNED: { label: 'Trả Hàng', colorClass: 'bg-orange-100 text-orange-800 border-orange-200' },
 };
 
 const PAYMENT_STATUS_MAP = {
-  UNPAID: { label: 'Chưa Thanh Toán', color: '#D97706' },
-  PAID: { label: 'Đã Thanh Toán', color: '#059669' },
-  REFUNDED: { label: 'Hoàn Tiền', color: '#7C3AED' },
+  UNPAID: { label: 'Chưa Thanh Toán', colorClass: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  PAID: { label: 'Đã Thanh Toán', colorClass: 'bg-green-100 text-green-800 border-green-200' },
+  REFUNDED: { label: 'Hoàn Tiền', colorClass: 'bg-purple-100 text-purple-800 border-purple-200' },
 };
 
 const NEXT_STATUSES = {

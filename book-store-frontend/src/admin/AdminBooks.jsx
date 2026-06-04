@@ -7,9 +7,9 @@ import {
 } from './AdminComponents';
 
 const STATUS_MAP = {
-  ACTIVE: { label: 'Đang Bán', color: '#4A7C59' },
-  INACTIVE: { label: 'Ngừng Bán', color: '#8B6508' },
-  OUT_OF_STOCK: { label: 'Hết Hàng', color: '#DC2626' },
+  ACTIVE: { label: 'Đang Bán', colorClass: 'bg-green-100 text-green-800 border-green-200' },
+  INACTIVE: { label: 'Ngừng Bán', colorClass: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  OUT_OF_STOCK: { label: 'Hết Hàng', colorClass: 'bg-red-100 text-red-700 border-red-200' },
 };
 
 const EMPTY_FORM = {
