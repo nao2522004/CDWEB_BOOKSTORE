@@ -7,9 +7,9 @@ import {
 } from './AdminComponents';
 
 const STATUS_MAP = {
-  ACTIVE: { label: 'Đang Bán', color: '#182522' },
-  INACTIVE: { label: 'Ngừng Bán', color: '#4A3C31' },
-  OUT_OF_STOCK: { label: 'Hết Hàng', color: '#632025' },
+  ACTIVE: { label: 'Đang Bán', color: '#4A7C59' },
+  INACTIVE: { label: 'Ngừng Bán', color: '#8B6508' },
+  OUT_OF_STOCK: { label: 'Hết Hàng', color: '#DC2626' },
 };
 
 const EMPTY_FORM = {
@@ -117,11 +117,11 @@ export default function AdminBooks() {
   };
 
   const handleDelete = async (book) => {
-    const ok = await confirm(`Xác nhận tiêu hủy ấn bản "${book.title}"?`);
+    const ok = await confirm(`Xác nhận xoá ấn bản "${book.title}"?`);
     if (!ok) return;
     try {
       await adminAPI.books.delete(book.id);
-      toast('Đã tiêu hủy ấn bản');
+      toast('Đã xoá ấn bản');
       fetchBooks();
     } catch (e) { toast(e.message, 'error'); }
   };
@@ -139,29 +139,33 @@ export default function AdminBooks() {
     {
       key: 'id',
       label: 'MÃ',
-      width: '60px',
-      render: v => <span className="text-[#996515] font-mono text-xs">{v}</span>
+      width: '70px',
+      render: v => <span className="text-[#8B6508] font-mono text-xs font-bold tracking-wider bg-[#8B6508]/10 px-2 py-1 rounded">{v}</span>
     },
     {
       key: 'title',
-      label: 'TÊN SÁCH',
+      label: 'TÊN SÁCH / ẤN BẢN',
       render: (v, row) => (
-        <div>
-          <p className="font-bold text-[#E8DCC4] text-sm font-serif tracking-wide">{v}</p>
-          <p className="text-[11px] text-[#A89F91] font-mono mt-1">ISBN: {row.isbn || 'N/A'}</p>
+        <div className="max-w-md py-1">
+          <p className="font-bold text-[#140E0A] text-base leading-tight hover:text-[#8B6508] transition-colors duration-200"
+            style={{ fontFamily: "'Playfair Display', serif" }}>{v}</p>
+          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-stone-500 font-mono">
+            <span className="bg-stone-100 px-1.5 py-0.5 rounded">ISBN: {row.isbn || 'N/A'}</span>
+            {row.language && <span className="uppercase border-l border-stone-300 pl-3">{row.language}</span>}
+          </div>
         </div>
       )
     },
     {
       key: 'price',
-      label: 'GIÁ TRỊ',
+      label: 'GIÁ BÁN',
       render: (v, row) => (
-        <div>
-          <p className="text-[#B8860B] font-bold text-sm font-mono">
+        <div className="py-1">
+          <p className="text-[#8B6508] font-bold text-sm font-mono tracking-wide bg-[#FAF5EC] px-2 py-0.5 rounded inline-block">
             {new Intl.NumberFormat('vi-VN').format(row.discountPrice || v)}đ
           </p>
           {row.discountPrice && (
-            <p className="text-[11px] text-[#7A6A58] line-through font-mono">
+            <p className="text-[11px] text-stone-400 line-through font-mono mt-0.5 pl-2">
               {new Intl.NumberFormat('vi-VN').format(v)}đ
             </p>
           )}
@@ -170,12 +174,21 @@ export default function AdminBooks() {
     },
     {
       key: 'stockQuantity',
-      label: 'LƯU KHO',
-      render: v => (
-        <span className={`font-mono font-bold text-sm ${v === 0 ? 'text-[#D97777]' : v < 5 ? 'text-[#D4A017]' : 'text-[#8BA896]'}`}>
-          {v ?? 0}
-        </span>
-      )
+      label: 'KHO',
+      render: v => {
+        const isOutOfStock = (v ?? 0) === 0;
+        const isLowStock = (v ?? 0) < 5;
+        const badgeClass = isOutOfStock
+          ? 'bg-red-50 text-red-600 border border-red-200'
+          : isLowStock
+            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+            : 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+        return (
+          <span className={`font-mono font-bold text-xs px-2.5 py-1 rounded-full ${badgeClass}`}>
+            {v ?? 0} quyển
+          </span>
+        )
+      }
     },
     {
       key: 'status',
@@ -184,164 +197,191 @@ export default function AdminBooks() {
     },
     {
       key: '_actions',
-      label: '',
+      label: 'THAO TÁC',
       render: (_, row) => (
-        <div className="flex gap-3 justify-end">
-          <AdminBtn size="sm" variant="secondary" onClick={() => openEdit(row)}>Sửa</AdminBtn>
-          <AdminBtn size="sm" variant="danger" onClick={() => handleDelete(row)}>Xóa</AdminBtn>
+        <div className="flex gap-2 justify-end opacity-80 hover:opacity-100 transition-opacity">
+          <AdminBtn size="sm" variant="secondary" className="hover:bg-stone-100" onClick={() => openEdit(row)}>Sửa</AdminBtn>
+          <AdminBtn size="sm" variant="danger" className="hover:bg-red-50" onClick={() => handleDelete(row)}>Xoá</AdminBtn>
         </div>
       )
     }
   ];
 
   return (
-    <div className="max-w-6xl text-[#E8DCC4]">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-xl shadow-sm border border-stone-200/60 my-4">
       <AdminPageHeader
         title="Quản Lý Thư Tịch"
-        subtitle={`Hiện có ${books?.totalElements ?? 0} đầu sách trong kho`}
+        subtitle={`Hiện có ${books?.totalElements ?? 0} đầu sách trong hệ thống lưu kho`}
         action={
-          <AdminBtn onClick={openCreate} className="bg-[#996515] hover:bg-[#B8860B] text-[#FDFBF7] transition-colors border border-[#B8860B]/30">
-            + Bổ Sung Sách
+          <AdminBtn onClick={openCreate} className="shadow-sm shadow-[#8B6508]/10 hover:translate-y-[-1px] transition-transform">
+            + Bổ Sung Sách Mới
           </AdminBtn>
         }
       />
 
-      <div className="flex gap-3 mb-6">
-        <AdminSearch
-          value={keyword}
-          onChange={v => { setKeyword(v); setPage(1); }}
-          placeholder="Tra cứu theo tên, mã ISBN, slug..."
-          className="bg-[#2A231D] border-[#4A3C31] text-[#E8DCC4] placeholder-[#8C7D6A] focus:border-[#996515]"
-        />
+      {/* Thanh công cụ / Tìm kiếm */}
+      <div className="flex gap-3 mb-6 bg-white p-3 rounded-lg border border-stone-200/60 shadow-xs">
+        <div className="w-full max-w-md">
+          <AdminSearch
+            value={keyword}
+            onChange={v => { setKeyword(v); setPage(1); }}
+            placeholder="Tra cứu nhanh theo tên, mã ISBN, slug..."
+          />
+        </div>
       </div>
 
-      <AdminTable
-        columns={columns}
-        data={books?.content}
-        loading={loading}
-        emptyMsg="Chưa có dữ liệu thư tịch"
-        className="border-[#4A3C31]"
-      />
+      {/* Bảng Dữ Liệu */}
+      <div className="bg-white rounded-lg border border-stone-200/60 shadow-xs overflow-hidden">
+        <AdminTable columns={columns} data={books?.content} loading={loading} emptyMsg="Chưa có dữ liệu thư tịch" />
+      </div>
 
-      <AdminPagination data={books} page={page} onPageChange={setPage} />
+      <div className="mt-4 flex justify-end">
+        <AdminPagination data={books} page={page} onPageChange={setPage} />
+      </div>
 
       {/* Form Modal */}
       <AdminModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? 'Hiệu Đính Thông Tin' : 'Nhập Liệu Sách Mới'}
-        width="max-w-2xl"
+        title={editing ? 'Hiệu Đính Thông Tin Thư Tịch' : 'Khai Báo Ấn Bản Mới'}
+        width="max-w-3xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-5 bg-[#1F1A17] p-6 rounded-[2px] border border-[#4A3C31]">
-          <div className="grid grid-cols-2 gap-5">
-            <FormField label="Tên Sách" required>
-              <AdminInput
-                value={form.title}
-                onChange={v => setForm(f => ({ ...f, title: v, slug: f.slug || slugify(v) }))}
-                placeholder="Tiêu đề đầy đủ"
-              />
-            </FormField>
-            <FormField label="Slug" required>
-              <AdminInput
-                value={form.slug}
-                onChange={v => setForm(f => ({ ...f, slug: v }))}
-                placeholder="ten-sach-slug"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar py-2">
+
+          {/* Nhóm Thông tin chính */}
+          <div className="bg-[#FAF8F5] p-4 rounded-lg border border-[#D4C4A8]/40 space-y-4">
+            <h4 className="text-xs font-bold tracking-widest text-[#8B6508] uppercase border-b border-[#D4C4A8]/30 pb-1.5 font-serif">Thông tin cơ bản</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField label="Tên Sách" required>
+                <AdminInput
+                  value={form.title}
+                  onChange={v => setForm(f => ({ ...f, title: v, slug: f.slug || slugify(v) }))}
+                  placeholder="Ví dụ: Số Đỏ (Ấn bản kỷ niệm)"
+                />
+              </FormField>
+              <FormField label="Slug đường dẫn (Tự động)" required>
+                <AdminInput
+                  value={form.slug}
+                  onChange={v => setForm(f => ({ ...f, slug: v }))}
+                  placeholder="so-do-an-ban-ky-niem"
+                  className="font-mono text-xs bg-stone-50 text-stone-600"
+                />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Nhóm Thuộc tính sách */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-lg border border-stone-200 space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-stone-500 uppercase border-b border-stone-100 pb-1.5">Định danh & Ngôn ngữ</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Mã ISBN">
+                  <AdminInput value={form.isbn} onChange={v => setForm(f => ({ ...f, isbn: v }))} placeholder="978-3-16..." className="font-mono" />
+                </FormField>
+                <FormField label="Ngôn Ngữ">
+                  <AdminInput value={form.language} onChange={v => setForm(f => ({ ...f, language: v }))} placeholder="vi" />
+                </FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Số Trang">
+                  <AdminInput type="number" value={form.pages} onChange={v => setForm(f => ({ ...f, pages: v }))} placeholder="0" />
+                </FormField>
+                <FormField label="Ngày Xuất Bản">
+                  <AdminInput type="date" value={form.publishedDate} onChange={v => setForm(f => ({ ...f, publishedDate: v }))} />
+                </FormField>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg border border-stone-200 space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-stone-500 uppercase border-b border-stone-100 pb-1.5">Thương mại & Kho</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Giá Niêm Yết (đ)" required>
+                  <AdminInput type="number" value={form.price} onChange={v => setForm(f => ({ ...f, price: v }))} placeholder="0" className="font-mono" />
+                </FormField>
+                <FormField label="Giá Ưu Đãi (đ)">
+                  <AdminInput type="number" value={form.discountPrice} onChange={v => setForm(f => ({ ...f, discountPrice: v }))} placeholder="Bỏ trống nếu không giảm" className="font-mono text-emerald-700" />
+                </FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Số Lượng Kho" required>
+                  <AdminInput type="number" value={form.stockQuantity} onChange={v => setForm(f => ({ ...f, stockQuantity: v }))} placeholder="0" className="font-mono font-bold" />
+                </FormField>
+                <FormField label="Tình Trạng Trạng Thái" required>
+                  <AdminSelect
+                    value={form.status}
+                    onChange={v => setForm(f => ({ ...f, status: v }))}
+                    options={[
+                      { value: 'ACTIVE', label: 'Đang Bán' },
+                      { value: 'INACTIVE', label: 'Ngừng Bán' },
+                      { value: 'OUT_OF_STOCK', label: 'Hết Hàng' },
+                    ]}
+                  />
+                </FormField>
+              </div>
+            </div>
+          </div>
+
+          {/* Nhóm Phân loại & Tác giả */}
+          <div className="bg-white p-4 rounded-lg border border-stone-200 space-y-4">
+            <h4 className="text-xs font-bold tracking-widest text-stone-500 uppercase border-b border-stone-100 pb-1.5">Phân loại & Tác quyền</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField label="Danh Mục" required>
+                <AdminSelect
+                  value={form.categoryId}
+                  onChange={v => setForm(f => ({ ...f, categoryId: v }))}
+                  placeholder="-- Chọn danh mục sách --"
+                  options={categories.map(c => ({ value: c.id, label: c.name }))}
+                />
+              </FormField>
+              <FormField label="Nhà Xuất Bản" required>
+                <AdminSelect
+                  value={form.publisherId}
+                  onChange={v => setForm(f => ({ ...f, publisherId: v }))}
+                  placeholder="-- Chọn nhà xuất bản --"
+                  options={publishers.map(p => ({ value: p.id, label: p.name }))}
+                />
+              </FormField>
+            </div>
+
+            <FormField label="Tác Giả / Dịch Giả (Có thể chọn đồng tác giả)">
+              <div className="bg-[#FAF6EE] border border-[#D4C4A8]/60 rounded-lg p-3 max-h-40 overflow-y-auto shadow-inner">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {authors.map(a => {
+                    const isChecked = form.authorIds.includes(a.id);
+                    return (
+                      <label key={a.id} className={`flex items-center gap-2.5 py-2 px-3 rounded-md cursor-pointer group transition-all border ${isChecked ? 'bg-white border-[#8B6508]/40 shadow-xs' : 'border-transparent hover:bg-white/60'}`}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleAuthor(a.id)}
+                          className="accent-[#8B6508] w-4 h-4 cursor-pointer rounded-sm"
+                        />
+                        <span className={`text-sm font-serif transition-colors leading-none ${isChecked ? 'text-[#8B6508] font-bold' : 'text-[#2C2114] group-hover:text-[#8B6508]'}`}
+                          style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {a.name}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             </FormField>
           </div>
 
-          <FormField label="Mô Tả Nội Dung">
+          <FormField label="Mô Tả Nội Dung / Tóm Tắt Tác Phẩm">
             <AdminTextarea
               value={form.description}
               onChange={v => setForm(f => ({ ...f, description: v }))}
-              rows={3}
-              placeholder="Tóm tắt hệ tư tưởng hoặc nội dung tác phẩm..."
+              rows={4}
+              placeholder="Nhập phần tóm tắt cốt truyện hoặc giới thiệu nội dung nổi bật của sách..."
             />
           </FormField>
 
-          <div className="grid grid-cols-2 gap-5">
-            <FormField label="Mã ISBN">
-              <AdminInput value={form.isbn} onChange={v => setForm(f => ({ ...f, isbn: v }))} placeholder="Ví dụ: 978-..." />
-            </FormField>
-            <FormField label="Ngôn Ngữ">
-              <AdminInput value={form.language} onChange={v => setForm(f => ({ ...f, language: v }))} placeholder="vi" />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-3 gap-5">
-            <FormField label="Giá Niêm Yết (VNĐ)" required>
-              <AdminInput type="number" value={form.price} onChange={v => setForm(f => ({ ...f, price: v }))} placeholder="0" />
-            </FormField>
-            <FormField label="Giá Ưu Đãi">
-              <AdminInput type="number" value={form.discountPrice} onChange={v => setForm(f => ({ ...f, discountPrice: v }))} placeholder="Bỏ trống nếu không giảm" />
-            </FormField>
-            <FormField label="Số Lượng Lưu Kho" required>
-              <AdminInput type="number" value={form.stockQuantity} onChange={v => setForm(f => ({ ...f, stockQuantity: v }))} placeholder="0" />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-3 gap-5">
-            <FormField label="Tổng Số Trang">
-              <AdminInput type="number" value={form.pages} onChange={v => setForm(f => ({ ...f, pages: v }))} />
-            </FormField>
-            <FormField label="Ngày Xuất Bản">
-              <AdminInput type="date" value={form.publishedDate} onChange={v => setForm(f => ({ ...f, publishedDate: v }))} />
-            </FormField>
-            <FormField label="Tình Trạng" required>
-              <AdminSelect
-                value={form.status}
-                onChange={v => setForm(f => ({ ...f, status: v }))}
-                options={[
-                  { value: 'ACTIVE', label: 'Đang Bán' },
-                  { value: 'INACTIVE', label: 'Ngừng Bán' },
-                  { value: 'OUT_OF_STOCK', label: 'Hết Hàng' },
-                ]}
-              />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-2 gap-5">
-            <FormField label="Phân Lược Danh Mục" required>
-              <AdminSelect
-                value={form.categoryId}
-                onChange={v => setForm(f => ({ ...f, categoryId: v }))}
-                placeholder="-- Chọn danh mục --"
-                options={categories.map(c => ({ value: c.id, label: c.name }))}
-              />
-            </FormField>
-            <FormField label="Đơn Vị Xuất Bản" required>
-              <AdminSelect
-                value={form.publisherId}
-                onChange={v => setForm(f => ({ ...f, publisherId: v }))}
-                placeholder="-- Chọn NXB --"
-                options={publishers.map(p => ({ value: p.id, label: p.name }))}
-              />
-            </FormField>
-          </div>
-
-          <FormField label="Ghi Nhận Tác Giả (Có thể chọn nhiều)">
-            {/* Box chứa danh sách tác giả mang sắc thái Gỗ sáng hơn một chút (bg-[#2A231D]) */}
-            <div className="bg-[#2A231D] border border-[#4A3C31] rounded-[2px] p-4 max-h-40 overflow-y-auto shadow-inner scrollbar-thin scrollbar-thumb-[#4A3C31] scrollbar-track-[#1F1A17]">
-              <div className="grid grid-cols-2 gap-2">
-                {authors.map(a => (
-                  <label key={a.id} className="flex items-center gap-3 py-1.5 px-2 hover:bg-[#3E3228] rounded-[2px] cursor-pointer group transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={form.authorIds.includes(a.id)}
-                      onChange={() => toggleAuthor(a.id)}
-                      className="accent-[#B8860B] w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-sm font-serif text-[#E8DCC4] group-hover:text-[#FDFBF7]">{a.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </FormField>
-
-          <div className="flex justify-end gap-4 pt-4 border-t border-[#4A3C31]">
-            <AdminBtn variant="secondary" onClick={() => setModalOpen(false)}>Hủy Bỏ</AdminBtn>
-            <AdminBtn type="submit" disabled={submitting} className="bg-[#996515] hover:bg-[#B8860B] text-[#FDFBF7] border border-[#B8860B]/30">
-              {submitting ? 'Đang Lưu...' : editing ? 'Lưu Hiệu Đính' : 'Đưa Vào Kho'}
+          {/* Nút hành động */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
+            <AdminBtn variant="secondary" className="hover:bg-stone-100" onClick={() => setModalOpen(false)}>Hủy Bỏ</AdminBtn>
+            <AdminBtn type="submit" disabled={submitting} className="px-6">
+              {submitting ? 'Đang Lưu...' : editing ? 'Cập Nhật Hiệu Đính' : 'Thêm Vào Kho Thư Tịch'}
             </AdminBtn>
           </div>
         </form>

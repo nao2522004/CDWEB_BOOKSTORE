@@ -2,17 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../api';
 import {
   AdminPageHeader, AdminBtn, AdminSearch, AdminTable, AdminModal,
-  FormField, AdminInput, AdminTextarea, AdminSelect, StatusBadge,
+  FormField, AdminInput, AdminSelect, StatusBadge,
   useConfirm, useAdminToast,
 } from './AdminComponents';
 
 const STATUS_MAP = {
-  ACTIVE:   { label: 'Hiệu Lực',  color: '#10B981' },
-  INACTIVE: { label: 'Vô Hiệu',   color: '#6B7280' },
-  EXPIRED:  { label: 'Hết Hạn',   color: '#EF4444' },
+  ACTIVE: { label: 'Hiệu Lực', color: '#059669' },
+  INACTIVE: { label: 'Vô Hiệu', color: '#6B7280' },
+  EXPIRED: { label: 'Hết Hạn', color: '#DC2626' },
 };
 
-const TYPE_LABELS = { PERCENTAGE: 'Phần Trăm (%)', FIXED_AMOUNT: 'Cố Định (VNĐ)' };
+const TYPE_LABELS = { PERCENTAGE: 'Chiết khấu (%)', FIXED_AMOUNT: 'Khấu trừ thẳng (Đ)' };
 
 const EMPTY_FORM = {
   code: '', type: 'PERCENTAGE', value: '',
@@ -78,11 +78,11 @@ export default function AdminCoupons() {
         minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : null,
         maxDiscountAmount: form.maxDiscountAmount ? parseFloat(form.maxDiscountAmount) : null,
         usageLimit: form.usageLimit ? parseInt(form.usageLimit) : null,
-        startDate: dateToIso(form.startDate),
-        endDate: dateToIso(form.endDate),
+        startDate: form.startDate ? dateToIso(form.startDate) : null,
+        endDate: form.endDate ? dateToIso(form.endDate) : null,
       };
       if (editing) {
-        await adminAPI.coupons.update(editing.id, payload);
+        await adminAPI.coupon.update(editing.id, payload);
         toast('Cập nhật coupon thành công');
       } else {
         await adminAPI.coupons.create(payload);
@@ -96,7 +96,7 @@ export default function AdminCoupons() {
 
   const handleDelete = async (coupon) => {
     if (coupon.usedCount > 0) {
-      toast(`Không thể xoá — coupon đã được dùng ${coupon.usedCount} lần. Hãy đặt trạng thái INACTIVE.`, 'error');
+      toast(`Không thể xoá — coupon đã dùng ${coupon.usedCount} lần. Hãy đặt trạng thái INACTIVE.`, 'error');
       return;
     }
     const ok = await confirm(`Xác nhận xoá coupon "${coupon.code}"?`);
@@ -124,57 +124,58 @@ export default function AdminCoupons() {
 
   const columns = [
     {
-      key: 'code',
-      label: 'Mã Coupon',
+      key: 'code', label: 'MÃ ƯU ĐÃI',
       render: (v, row) => (
-        <div>
-          <p className="font-bold text-[#C9922A] font-mono tracking-widest text-xs">{v}</p>
-          <p className="text-[10px] text-[#6B5A3E] mt-0.5">{TYPE_LABELS[row.type]}</p>
+        <div className="py-0.5">
+          <p className="font-bold text-[#8B6508] font-mono tracking-widest text-sm bg-[#8B6508]/5 border border-[#8B6508]/20 px-2 py-0.5 rounded inline-block shadow-2xs">{v}</p>
+          <p className="text-[11px] text-stone-400 mt-1 font-medium">{TYPE_LABELS[row.type]}</p>
         </div>
       )
     },
     {
-      key: 'value',
-      label: 'Giá Trị',
+      key: 'value', label: 'MỨC GIẢM',
       render: (v, row) => (
-        <span className="font-mono font-bold text-xs text-[#D4C4A8]">
+        <span className="font-mono font-bold text-sm text-[#140E0A] bg-stone-100/80 px-2 py-1 rounded border border-stone-200/40">
           {row.type === 'PERCENTAGE' ? `${v}%` : `${fmt(v)}đ`}
         </span>
       )
     },
     {
-      key: 'usedCount',
-      label: 'Đã Dùng',
+      key: 'usedCount', label: 'SẢN LƯỢNG SỬ DỤNG',
       render: (v, row) => (
-        <span className="font-mono text-xs text-[#8A7355]">
-          {v ?? 0}{row.usageLimit ? `/${row.usageLimit}` : ''}
-        </span>
+        <div className="text-xs">
+          <span className="font-mono font-bold text-[#140E0A]">{v ?? 0}</span>
+          {row.usageLimit ? (
+            <span className="text-stone-400 font-mono text-[11px]"> / {row.usageLimit} <span className="text-[10px] text-stone-400 font-sans block mt-0.5">lượt tối đa</span></span>
+          ) : (
+            <span className="text-stone-400 font-sans text-[10px] block mt-0.5">Vô hạn lượt</span>
+          )}
+        </div>
       )
     },
     {
-      key: 'endDate',
-      label: 'Hết Hạn',
+      key: 'endDate', label: 'HẠN SỬ DỤNG',
       render: v => v ? (
-        <span className={`text-xs font-mono ${new Date(v) < new Date() ? 'text-red-500' : 'text-[#6B5A3E]'}`}>
-          {new Date(v).toLocaleDateString('vi-VN')}
-        </span>
-      ) : <span className="text-[#6B5A3E] text-xs">Không giới hạn</span>
+        <div className="font-mono text-xs">
+          <span className={new Date(v) < new Date() ? 'text-red-600 bg-red-50 font-bold px-1.5 py-0.5 rounded' : 'text-stone-600'}>
+            {new Date(v).toLocaleDateString('vi-VN')}
+          </span>
+        </div>
+      ) : <span className="text-stone-400 italic text-xs bg-stone-50 px-2 py-0.5 rounded border border-dashed border-stone-200">Vĩnh viễn</span>
     },
     {
-      key: 'status',
-      label: 'Trạng Thái',
+      key: 'status', label: 'TRẠNG THÁI',
       render: v => <StatusBadge status={v} map={STATUS_MAP} />,
     },
     {
-      key: '_actions',
-      label: '',
+      key: '_actions', label: 'THAO TÁC',
       render: (_, row) => (
-        <div className="flex gap-2 justify-end">
-          <AdminBtn size="sm" variant="secondary" onClick={() => openEdit(row)}>Sửa</AdminBtn>
+        <div className="flex gap-2 justify-end opacity-90 hover:opacity-100 transition-opacity">
+          <AdminBtn size="sm" variant="secondary" className="hover:bg-stone-100" onClick={() => openEdit(row)}>Sửa</AdminBtn>
           {row.status === 'ACTIVE' && row.usedCount > 0 ? (
-            <AdminBtn size="sm" variant="danger" onClick={() => handleDeactivate(row)}>Vô Hiệu</AdminBtn>
+            <AdminBtn size="sm" variant="danger" className="hover:bg-red-50 text-amber-700 border-amber-200" onClick={() => handleDeactivate(row)}>Vô Hiệu</AdminBtn>
           ) : (
-            <AdminBtn size="sm" variant="danger" onClick={() => handleDelete(row)}>Xoá</AdminBtn>
+            <AdminBtn size="sm" variant="danger" className="hover:bg-red-50" onClick={() => handleDelete(row)}>Xoá</AdminBtn>
           )}
         </div>
       )
@@ -182,87 +183,124 @@ export default function AdminCoupons() {
   ];
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-xl shadow-sm border border-stone-200/60 my-4">
       <AdminPageHeader
-        title="Quản Lý Coupon"
-        subtitle={`${coupons.length} mã giảm giá`}
-        action={<AdminBtn onClick={openCreate}>+ Tạo Coupon</AdminBtn>}
+        title="Quản Lý Mã Ưu Đãi (Coupon)"
+        subtitle={`Hệ thống đang phát hành ${coupons.length} chiến dịch giảm giá công khai`}
+        action={
+          <AdminBtn onClick={openCreate} className="shadow-sm shadow-[#8B6508]/10 hover:translate-y-[-1px] transition-transform">
+            + Khởi Tạo Coupon
+          </AdminBtn>
+        }
       />
 
-      <div className="mb-4">
-        <AdminSearch value={keyword} onChange={setKeyword} placeholder="Tìm theo mã coupon..." />
+      <div className="mb-5 bg-white p-3 rounded-lg border border-stone-200/60 shadow-xs">
+        <div className="max-w-md">
+          <AdminSearch value={keyword} onChange={setKeyword} placeholder="Tra cứu theo mã Coupon ký tự..." />
+        </div>
       </div>
 
-      <AdminTable columns={columns} data={filtered} loading={loading} emptyMsg="Chưa có coupon nào" />
+      <div className="bg-white rounded-lg border border-stone-200/60 shadow-xs overflow-hidden">
+        <AdminTable columns={columns} data={filtered} loading={loading} emptyMsg="Chưa ghi nhận mã coupon giảm giá nào" />
+      </div>
 
-      {/* Form Modal */}
       <AdminModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? 'Chỉnh Sửa Coupon' : 'Tạo Coupon Mới'}
+        title={editing ? 'Cấu Hình Lại Mã Ưu Đãi' : 'Khởi Tạo Mã Ưu Đãi Mới'}
+        width="max-w-2xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Mã Coupon" required>
+        <form onSubmit={handleSubmit} className="space-y-5 py-2">
+          {/* Section 1: Thông tin cơ bản */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FAF8F5] p-3 rounded-lg border border-[#D4C4A8]/30">
+            <FormField label="Mã Ưu Đãi (Mã viết hoa)" required>
               <AdminInput
                 value={form.code}
                 onChange={v => setForm(f => ({ ...f, code: v.toUpperCase() }))}
-                placeholder="SUMMER10"
+                placeholder="Ví dụ: BOOKWORM10"
                 disabled={!!editing}
+                className="font-mono tracking-widest font-bold text-sm"
               />
             </FormField>
-            <FormField label="Loại Giảm" required>
+            <FormField label="Phương Thức Khấu Trừ" required>
               <AdminSelect
                 value={form.type}
-                onChange={v => setForm(f => ({ ...f, type: v }))}
+                onChange={v => setForm(f => ({ ...f, type: v, value: '' }))}
                 options={[
-                  { value: 'PERCENTAGE', label: 'Phần Trăm (%)' },
-                  { value: 'FIXED_AMOUNT', label: 'Cố Định (VNĐ)' },
+                  { value: 'PERCENTAGE', label: 'Chiết khấu Phần Trăm (%)' },
+                  { value: 'FIXED_AMOUNT', label: 'Khấu trừ Tiền Mặt (VNĐ)' },
                 ]}
               />
             </FormField>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <FormField label={form.type === 'PERCENTAGE' ? 'Giá Trị (%)' : 'Số Tiền (VNĐ)'} required>
-              <AdminInput type="number" value={form.value} onChange={v => setForm(f => ({ ...f, value: v }))} placeholder={form.type === 'PERCENTAGE' ? '10' : '50000'} />
+          {/* Section 2: Định lượng giá trị chiết khấu */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormField label={form.type === 'PERCENTAGE' ? 'Mức Chiết Khấu (%)' : 'Số Tiền Giảm (VNĐ)'} required>
+              <div className="relative">
+                <AdminInput type="number" value={form.value} onChange={v => setForm(f => ({ ...f, value: v }))} placeholder={form.type === 'PERCENTAGE' ? '10' : '50000'} />
+                <span className="absolute right-3 top-2.5 text-xs font-bold text-stone-400 pointer-events-none font-mono">
+                  {form.type === 'PERCENTAGE' ? '%' : 'đ'}
+                </span>
+              </div>
             </FormField>
-            <FormField label="Đơn Tối Thiểu" hint="Không bắt buộc">
-              <AdminInput type="number" value={form.minOrderAmount} onChange={v => setForm(f => ({ ...f, minOrderAmount: v }))} placeholder="200000" />
+
+            <FormField label="Đơn Tối Thiểu Được Áp Dụng" hint="Nhập 0 nếu không giới hạn">
+              <div className="relative">
+                <AdminInput type="number" value={form.minOrderAmount} onChange={v => setForm(f => ({ ...f, minOrderAmount: v }))} placeholder="200000" />
+                <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none font-mono">đ</span>
+              </div>
             </FormField>
-            <FormField label="Giảm Tối Đa" hint="Cho loại %">
-              <AdminInput type="number" value={form.maxDiscountAmount} onChange={v => setForm(f => ({ ...f, maxDiscountAmount: v }))} placeholder="100000" />
+
+            <FormField
+              label="Mức Giảm Tối Đa"
+              hint={form.type === 'PERCENTAGE' ? "Giới hạn trần giảm" : "Bị khóa cho loại trừ thẳng"}
+            >
+              <div className="relative">
+                <AdminInput
+                  type="number"
+                  value={form.maxDiscountAmount}
+                  onChange={v => setForm(f => ({ ...f, maxDiscountAmount: v }))}
+                  placeholder="100000"
+                  disabled={form.type === 'FIXED_AMOUNT'}
+                  className={form.type === 'FIXED_AMOUNT' ? 'bg-stone-100/50 text-stone-400 cursor-not-allowed' : ''}
+                />
+                <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none font-mono">đ</span>
+              </div>
             </FormField>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <FormField label="Giới Hạn Lượt" hint="Không bắt buộc">
+          {/* Section 3: Giới hạn hành chính */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-b border-stone-200/60 py-4">
+            <FormField label="Giới Hạn Tổng Lượt Dùng" hint="Để trống nếu vô hạn">
               <AdminInput type="number" value={form.usageLimit} onChange={v => setForm(f => ({ ...f, usageLimit: v }))} placeholder="100" />
             </FormField>
-            <FormField label="Ngày Bắt Đầu">
-              <AdminInput type="date" value={form.startDate} onChange={v => setForm(f => ({ ...f, startDate: v }))} />
+
+            <FormField label="Ngày Bắt Đầu Hiệu Lực">
+              <AdminInput type="date" value={form.startDate} onChange={v => setForm(f => ({ ...f, startDate: v }))} className="text-xs" />
             </FormField>
+
             <FormField label="Ngày Hết Hạn">
-              <AdminInput type="date" value={form.endDate} onChange={v => setForm(f => ({ ...f, endDate: v }))} />
+              <AdminInput type="date" value={form.endDate} onChange={v => setForm(f => ({ ...f, endDate: v }))} className="text-xs" />
             </FormField>
           </div>
 
-          <FormField label="Trạng Thái" required>
+          <FormField label="Trạng Thái Vận Hành" required>
             <AdminSelect
               value={form.status}
               onChange={v => setForm(f => ({ ...f, status: v }))}
               options={[
-                { value: 'ACTIVE', label: 'Hiệu Lực' },
-                { value: 'INACTIVE', label: 'Vô Hiệu' },
-                { value: 'EXPIRED', label: 'Hết Hạn' },
+                { value: 'ACTIVE', label: 'Hiệu Lực (Kích hoạt chạy chiến dịch ngay)' },
+                { value: 'INACTIVE', label: 'Vô Hiệu (Tạm đóng mã)' },
+                { value: 'EXPIRED', label: 'Hết Hạn (Buộc dừng chiến dịch)' },
               ]}
             />
           </FormField>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <AdminBtn variant="secondary" onClick={() => setModalOpen(false)}>Huỷ</AdminBtn>
-            <AdminBtn type="submit" disabled={submitting}>
-              {submitting ? 'Đang lưu...' : editing ? 'Cập Nhật' : 'Tạo Coupon'}
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
+            <AdminBtn variant="secondary" className="hover:bg-stone-100" onClick={() => setModalOpen(false)}>Huỷ Bỏ</AdminBtn>
+            <AdminBtn type="submit" disabled={submitting} className="px-5">
+              {submitting ? 'Đang lưu...' : editing ? 'Lưu Thay Đổi' : 'Phát Hành Mã'}
             </AdminBtn>
           </div>
         </form>
