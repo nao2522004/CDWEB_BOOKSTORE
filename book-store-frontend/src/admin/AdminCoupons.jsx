@@ -7,9 +7,9 @@ import {
 } from './AdminComponents';
 
 const STATUS_MAP = {
-  ACTIVE: { label: 'Hiệu Lực', color: '#059669' },
-  INACTIVE: { label: 'Vô Hiệu', color: '#6B7280' },
-  EXPIRED: { label: 'Hết Hạn', color: '#DC2626' },
+  ACTIVE: { label: 'Hiệu Lực', colorClass: 'bg-green-100 text-green-800 border-green-200' },
+  INACTIVE: { label: 'Vô Hiệu', colorClass: 'bg-gray-100 text-gray-700 border-gray-200' },
+  EXPIRED: { label: 'Hết Hạn', colorClass: 'bg-red-100 text-red-700 border-red-200' },
 };
 
 const TYPE_LABELS = { PERCENTAGE: 'Chiết khấu (%)', FIXED_AMOUNT: 'Khấu trừ thẳng (Đ)' };
@@ -82,7 +82,7 @@ export default function AdminCoupons() {
         endDate: form.endDate ? dateToIso(form.endDate) : null,
       };
       if (editing) {
-        await adminAPI.coupon.update(editing.id, payload);
+        await adminAPI.coupons.update(editing.id, payload);
         toast('Cập nhật coupon thành công');
       } else {
         await adminAPI.coupons.create(payload);
@@ -111,9 +111,14 @@ export default function AdminCoupons() {
   const handleDeactivate = async (coupon) => {
     try {
       const payload = {
-        code: coupon.code, type: coupon.type, value: coupon.value,
-        minOrderAmount: coupon.minOrderAmount, maxDiscountAmount: coupon.maxDiscountAmount,
-        usageLimit: coupon.usageLimit, startDate: coupon.startDate, endDate: coupon.endDate,
+        code: coupon.code,
+        type: coupon.type,
+        value: coupon.value,
+        minOrderAmount: coupon.minOrderAmount ?? null,
+        maxDiscountAmount: coupon.maxDiscountAmount ?? null,
+        usageLimit: coupon.usageLimit ?? null,
+        startDate: coupon.startDate ?? null,
+        endDate: coupon.endDate ?? null,
         status: 'INACTIVE',
       };
       await adminAPI.coupons.update(coupon.id, payload);

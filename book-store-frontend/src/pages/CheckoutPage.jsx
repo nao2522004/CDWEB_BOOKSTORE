@@ -224,7 +224,7 @@ export default function CheckoutPage() {
                       type="checkbox"
                       id="isDefaultCheckbox"
                       checked={newAddr.isDefault || false}
-                      onChange={e => setNewAddr(a => ({ ...a, [f.key || 'isDefault']: e.target.checked }))}
+                      onChange={e => setNewAddr(a => ({ ...a, isDefault: e.target.checked }))}
                       className="accent-[#8B6508] cursor-pointer"
                     />
                     <label
@@ -344,7 +344,7 @@ export default function CheckoutPage() {
                 {cart.items.map(item => (
                   <div key={item.bookId} className="flex justify-between items-start text-xs pt-2.5 first:pt-0 font-serif text-stone-700" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                     <span className="line-clamp-2 flex-1 mr-4 font-bold leading-tight">{item.bookTitle} <span className="font-sans font-normal text-xs text-stone-400">x{item.quantity}</span></span>
-                    <span className="font-sans font-bold text-stone-900 whitespace-nowrap">{formatPrice(item.price * item.quantity)}</span>
+                    <span className="font-sans font-bold text-stone-900 whitespace-nowrap">{formatPrice(item.unitPrice * item.quantity)}</span>
                   </div>
                 ))}
               </div>

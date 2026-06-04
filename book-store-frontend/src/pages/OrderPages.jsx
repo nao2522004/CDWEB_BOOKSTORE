@@ -185,14 +185,14 @@ export function OrderDetailPage() {
             <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#140E0A] mb-4 border-b border-[#D4C4A8]/40 pb-2" style={{ fontFamily: "'Cinzel', serif" }}>
               📍 Địa Sở Tiếp Thụ
             </h2>
-            {order.address && (
+            {order.recipientName && (
               <div className="text-xs sm:text-sm space-y-1.5 relative z-10">
                 <p className="font-bold text-[#2C2114] uppercase tracking-wide" style={{ fontFamily: "'Cinzel', serif" }}>
-                  {order.address.fullName}
+                  {order.recipientName}
                 </p>
-                <p className="text-[#8B6508] font-mono">{order.address.phone}</p>
+                <p className="text-[#8B6508] font-mono">{order.recipientPhone}</p>
                 <p className="text-stone-600 font-serif leading-relaxed" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                  {order.address.street}, {order.address.ward}, {order.address.district}, {order.address.province}
+                  {order.shippingAddress}
                 </p>
               </div>
             )}
