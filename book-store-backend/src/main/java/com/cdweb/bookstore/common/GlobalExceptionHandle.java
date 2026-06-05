@@ -20,17 +20,17 @@ public class GlobalExceptionHandle {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleException(Exception ex) {
 		System.out.println(ex);
-		return ApiResponse.error(HttpStatus.BAD_REQUEST + "", ex.getMessage());
+		return ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
 	}
 
 	@ExceptionHandler(EntityNotFoundException.class)
 	public ResponseEntity<?> handleNotFound(EntityNotFoundException ex) {
-		return ApiResponse.error(HttpStatus.BAD_REQUEST + "", ex.getMessage());
+		return ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
 	}
 
 	@ExceptionHandler({ ResourceNotFoundException.class, ResourceAlreadyExistsException.class })
 	public ResponseEntity<?> handleNotFound(Exception ex) {
-		return ApiResponse.error(HttpStatus.BAD_REQUEST + "", ex.getMessage());
+		return ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
 	}
 
 	// xu ly ngoai le chu url neu sai dinh dang

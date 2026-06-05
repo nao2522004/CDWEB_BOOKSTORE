@@ -55,13 +55,13 @@ export default function AdminBooks() {
 
   useEffect(() => {
     Promise.all([
-      categoryAPI.getAll({ size: 100 }),
-      authorAPI.getAll({ size: 200 }),
-      publisherAPI.getAll({ size: 100 }),
+      categoryAPI.getAllList(),
+      authorAPI.getAllList(),
+      publisherAPI.getAllList(),
     ]).then(([c, a, p]) => {
-      setCategories(c.data?.content || c.data || []);
-      setAuthors(a.data?.content || a.data || []);
-      setPublishers(p.data?.content || p.data || []);
+      setCategories(c.data || []);
+      setAuthors(a.data || []);
+      setPublishers(p.data || []);
     });
   }, []);
 

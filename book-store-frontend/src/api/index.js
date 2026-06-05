@@ -38,10 +38,11 @@ const refreshAccessToken = async () => {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setToken(null);
-      throw new Error(data.message || "Phiên đăng nhập đã hết hạn");
+      throw new Error(data?.message || "Phiên đăng nhập đã hết hạn");
     }
-    setToken(data.data.accessToken);
-    return data.data.accessToken;
+    const token = data?.data?.accessToken;
+    if (token) setToken(token);
+    return token;
   })();
 
   try {
@@ -158,6 +159,7 @@ export const bookAPI = {
 export const categoryAPI = {
   getAll: (params, options) =>
     request("GET", "/categories", null, params, options),
+  getAllList: (options) => request("GET", "/categories/all", null, null, options),
   getById: (id, options) =>
     request("GET", `/categories/${id}`, null, null, options),
 };
@@ -165,6 +167,7 @@ export const categoryAPI = {
 export const authorAPI = {
   getAll: (params, options) =>
     request("GET", "/authors", null, params, options),
+  getAllList: (options) => request("GET", "/authors/all", null, null, options),
   getById: (id, options) =>
     request("GET", `/authors/${id}`, null, null, options),
 };
@@ -172,6 +175,7 @@ export const authorAPI = {
 export const publisherAPI = {
   getAll: (params, options) =>
     request("GET", "/publishers", null, params, options),
+  getAllList: (options) => request("GET", "/publishers/all", null, null, options),
   getById: (id, options) =>
     request("GET", `/publishers/${id}`, null, null, options),
 };

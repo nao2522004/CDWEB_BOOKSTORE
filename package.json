@@ -1,0 +1,10 @@
+{
+  "name": "cdweb-bookstore-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend": "cd book-store-backend && mvnw spring-boot:run",
+    "frontend": "cd book-store-frontend && npm run dev",
+    "dev": "npx concurrently \"npm run backend\" \"npm run frontend\""
+  }
+}

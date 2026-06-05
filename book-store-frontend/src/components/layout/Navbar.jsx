@@ -94,7 +94,7 @@ export default function Navbar() {
                     <Link to="/profile" className="block px-4 py-2.5 text-xs uppercase tracking-wide text-[#3E2F1A] hover:bg-[#F3EFE6]/70 hover:text-[#8B6508] transition-colors" style={{ fontFamily: "'Cinzel', serif" }} onClick={() => setUserMenu(false)}>
                       Hồ Sơ Độc Giả
                     </Link>
-                    {user.roles?.includes('ADMIN') && (
+                    {user.roles?.includes('ROLE_ADMIN') && (
                       <Link to="/admin" className="block px-4 py-2.5 text-xs uppercase tracking-wide text-[#8B6508] bg-[#8B6508]/5 hover:bg-[#8B6508]/10 font-bold" style={{ fontFamily: "'Cinzel', serif" }} onClick={() => setUserMenu(false)}>
                         Biện Giám (Admin)
                       </Link>

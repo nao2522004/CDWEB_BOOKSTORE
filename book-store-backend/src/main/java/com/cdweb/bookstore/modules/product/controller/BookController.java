@@ -24,12 +24,13 @@ public class BookController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BookDTO>>> getAll(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        return ApiResponse.ok(bookService.getAllBooks(keyword, page, size, sortBy, sortDir));
+        return ApiResponse.ok(bookService.getAllBooks(keyword, categoryId, page, size, sortBy, sortDir));
     }
 
     @GetMapping("/all")

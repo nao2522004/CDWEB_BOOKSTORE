@@ -79,7 +79,7 @@ export default function AdminDashboard() {
       if (ordersRes.status === 'fulfilled') {
         setStats(s => ({
           ...s,
-          orders: ordersRes.value.data?.totalElements ?? ordersRes.value.data?.content?.length ?? 0,
+          orders: ordersRes.value.data?.totalElements ?? 0,
         }));
         setRecentOrders(ordersRes.value.data?.content?.slice(0, 5) || []);
       }

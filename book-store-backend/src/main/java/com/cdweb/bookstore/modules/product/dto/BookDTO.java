@@ -28,6 +28,9 @@ public class BookDTO {
     private Instant publishedDate;
     private Book.Status status;
     private Boolean isDeleted;
-    // ── Request only ─────────────────────────────────────────────────────────
+    private String coverImageUrl;
     private List<Long> authorIds;
+    private List<AuthorDTO> authors;
+    private PublisherDTO publisher;
+    private List<CategoryDTO> categories;
 }

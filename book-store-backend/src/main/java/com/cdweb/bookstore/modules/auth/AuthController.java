@@ -9,7 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -68,5 +71,23 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request) {
         RegisterResponse user = authService.register(request);
         return ApiResponse.created(user, "Đăng ký tài khoản người dùng thành công");
+    }
+
+    /**
+     * PUT /auth/change-password
+     */
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        authService.changePassword(extractUserId(jwt), request);
+        return ApiResponse.ok(null, "Thay đổi mật khẩu thành công");
+    }
+
+    private Long extractUserId(Jwt jwt) {
+        if (jwt == null) throw new RuntimeException("Chưa đăng nhập (thiếu JWT)");
+        Object raw = jwt.getClaim("userId");
+        if (raw instanceof Number number) return number.longValue();
+        throw new RuntimeException("Token không hợp lệ: thiếu claim userId");
     }
 }
