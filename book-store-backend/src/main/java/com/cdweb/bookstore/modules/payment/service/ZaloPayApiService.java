@@ -84,8 +84,9 @@ public class ZaloPayApiService {
             int appId = zaloPayProperties.getAppId();
             long appTime = System.currentTimeMillis();
 
-            // embed_data chứa orderId để server nhận lại khi ZaloPay callback
-            String embedData = "{\"orderId\":" + orderId + "}";
+            // embed_data chứa orderId để server nhận lại khi ZaloPay callback, và redirecturl để ZaloPay chuyển hướng khách hàng về sau khi thanh toán thành công
+            String redirectUrl = zaloPayProperties.getClientUrl() + "/payment/zalopay/return";
+            String embedData = "{\"orderId\":" + orderId + ",\"redirecturl\":\"" + redirectUrl + "\"}";
             String item = "[]";
 
             // Chuỗi ký: app_id|app_trans_id|app_user|amount|app_time|embed_data|item

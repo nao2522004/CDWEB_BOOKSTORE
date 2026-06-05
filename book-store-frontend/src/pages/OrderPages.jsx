@@ -5,29 +5,36 @@ import { formatPrice, formatDate, getOrderStatusColor, getOrderStatusLabel, getP
 import { Spinner, Pagination } from '../components/common';
 
 export function OrdersPage() {
-  const [orders, setOrders] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     setLoading(true);
-    orderAPI.getMyOrders({ page, size: 10 })
-      .then(r => setOrders(r.data))
+    orderAPI.getMyOrders()
+      .then(r => setOrders(r.data || []))
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, [page]);
+  }, []);
+
+  const ordersList = Array.isArray(orders) ? orders : (orders?.content || []);
+  
+  // Client-side pagination if backend returns full list
+  const totalPages = Math.ceil(ordersList.length / itemsPerPage);
+  const paginatedOrders = ordersList.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   return (
     <div className="bg-[#FAF5EC] min-h-screen text-[#2C2114] selection:bg-[#E6CE9A]/50 pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
 
         <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#140E0A] tracking-wide border-b border-[#D4C4A8] pb-5 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Lịch Sử Tông Ký
+          Lịch Sử Tông Ký (Quản Lý Đơn Hàng)
         </h1>
 
         {loading ? (
           <div className="flex justify-center py-28"><Spinner size="lg" /></div>
-        ) : !orders?.content?.length ? (
+        ) : !ordersList.length ? (
           <div className="bg-[#FAF5EC] border border-[#D4C4A8] py-20 px-4 text-center shadow-sm relative">
             <div className="absolute inset-1.5 border border-[#8B6508]/10 pointer-events-none" />
             <span className="inline-block text-3xl text-[#A8967E] mb-4">❖</span>
@@ -48,7 +55,7 @@ export function OrdersPage() {
         ) : (
           <>
             <div className="space-y-4">
-              {orders.content.map(order => (
+              {paginatedOrders.map(order => (
                 <Link
                   key={order.id}
                   to={`/orders/${order.id}`}
@@ -63,9 +70,11 @@ export function OrdersPage() {
                       </p>
                       <p className="text-[11px] text-stone-400 font-mono mt-0.5">{formatDate(order.createdAt)}</p>
                     </div>
-                    <span className={`text-[10px] uppercase tracking-widest font-extrabold px-3 py-1.5 rounded-[1px] border ${getOrderStatusColor(order.status)}`} style={{ fontFamily: "'Cinzel', serif" }}>
-                      {getOrderStatusLabel(order.status)}
-                    </span>
+                    <div className="flex gap-2 items-center">
+                      <span className={`text-[10px] uppercase tracking-widest font-extrabold px-3 py-1.5 rounded-[1px] border ${getOrderStatusColor(order.status)}`} style={{ fontFamily: "'Cinzel', serif" }}>
+                        {getOrderStatusLabel(order.status)}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-[#D4C4A8]/30">
@@ -80,19 +89,29 @@ export function OrdersPage() {
               ))}
             </div>
 
-            <div className="mt-8">
-              <Pagination
-                data={orders}
-                onPageChange={setPage}
-                currentPage={page}
-              />
-            </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`px-3 py-1 border rounded-[1px] text-xs font-mono font-bold transition-all ${page === pageNum
+                      ? 'bg-[#2C2114] text-[#FAF5EC] border-[#2C2114]'
+                      : 'border-[#D4C4A8] hover:bg-[#8B6508]/5 text-[#2C2114]'
+                      }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
     </div>
   );
 }
+
 
 export function OrderDetailPage() {
   const { id } = useParams();

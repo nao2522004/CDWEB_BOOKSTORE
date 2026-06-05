@@ -14,4 +14,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     // Fetch roles eagerly để tránh LazyInitializationException khi build JWT
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.email = :email")
     Optional<User> findByEmailWithRoles(String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id")
+    Optional<User> findByIdWithRoles(Long id);
 }

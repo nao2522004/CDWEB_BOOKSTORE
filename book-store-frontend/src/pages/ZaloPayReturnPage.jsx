@@ -49,8 +49,7 @@ export default function ZaloPayReturnPage() {
         const txn = res?.data;
         setSyncResult(txn);
 
-        // Nếu đã có kết quả xác định (paid hoặc failed), dừng poll
-        if (txn?.status === 'PAID' || txn?.status === 'FAILED') {
+        if (txn?.status === 'SUCCESS' || txn?.status === 'FAILED') {
           clearInterval(pollRef.current);
           setSyncing(false);
         } else {
@@ -89,8 +88,8 @@ export default function ZaloPayReturnPage() {
 
   /*  Render helpers  */
 
-  const finalStatus = syncResult?.status ?? (isPaid ? 'PAID' : 'FAILED');
-  const isSuccess = finalStatus === 'PAID';
+  const finalStatus = syncResult?.status ?? (isPaid ? 'SUCCESS' : 'FAILED');
+  const isSuccess = finalStatus === 'SUCCESS';
 
   return (
     <div className="bg-[#FAF5EC] min-h-screen flex items-center justify-center px-4 py-20"
