@@ -53,7 +53,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         }
 
         Long userId = Long.parseLong(userIdRaw.toString());
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findByIdWithRoles(userId).orElse(null);
         if (user == null) {
             log.error("Google OAuth2 success: không tìm thấy user ID={}", userId);
             response.sendRedirect(FRONTEND_REDIRECT_URL + "?error=user_not_found");
@@ -74,14 +74,11 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         // Set refresh token vào HttpOnly Cookie
         jwtService.setRefreshTokenCookie(response, refreshToken);
 
-        // Redirect về frontend kèm access token
         String redirectUrl = UriComponentsBuilder.fromUriString(FRONTEND_REDIRECT_URL)
                 .queryParam("token", accessToken)
-                .queryParam("userId", user.getId())
-                .queryParam("name", user.getName())
-                .queryParam("email", user.getEmail())
-                .build().toUriString();
-
+                .build()
+                .encode()
+                .toUriString();
         log.info("Google OAuth2: redirect về frontend [userId={}]", userId);
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }

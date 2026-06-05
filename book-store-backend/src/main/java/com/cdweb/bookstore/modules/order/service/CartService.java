@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final CartRepository  cartRepository;
-    private final BookRepository  bookRepository;
-    private final UserRepository  userRepository;
+    private final CartRepository cartRepository;
+    private final BookRepository bookRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public CartResponse getCart(Long userId) {
@@ -44,12 +44,14 @@ public class CartService {
             int newQty = existingItem.getQuantity() + request.quantity();
             assertSufficientStock(book, newQty);
             existingItem.setQuantity(newQty);
+            existingItem.setUnitPrice(book.getEffectivePrice());
         } else {
             assertSufficientStock(book, request.quantity());
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .book(book)
                     .quantity(request.quantity())
+                    .unitPrice(book.getEffectivePrice())
                     .build();
             cart.getItems().add(newItem);
         }
@@ -122,7 +124,7 @@ public class CartService {
         if (available < requiredQty) {
             throw new RuntimeException(
                     "Sách \"" + book.getTitle() + "\" chỉ còn " + available +
-                    " cuốn trong kho (bạn yêu cầu " + requiredQty + ")");
+                            " cuốn trong kho (bạn yêu cầu " + requiredQty + ")");
         }
     }
 }

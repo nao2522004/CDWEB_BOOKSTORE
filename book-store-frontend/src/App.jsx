@@ -7,30 +7,30 @@ import Footer from './components/layout/Footer';
 import { Spinner, LoadingPage, ErrorBoundary } from './components/common';
 
 // ── Public / User pages ──────────────────────────────────────────────────────
-const HomePage        = lazy(() => import('./pages/HomePage'));
-const BooksPage       = lazy(() => import('./pages/BooksPage'));
-const BookDetailPage  = lazy(() => import('./pages/BookDetailPage'));
-const CartPage        = lazy(() => import('./pages/CartPage'));
-const CheckoutPage    = lazy(() => import('./pages/CheckoutPage'));
-const LoginPage       = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.LoginPage })));
-const RegisterPage    = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.RegisterPage })));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const BooksPage = lazy(() => import('./pages/BooksPage'));
+const BookDetailPage = lazy(() => import('./pages/BookDetailPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const LoginPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.RegisterPage })));
 const OAuth2CallbackPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.OAuth2CallbackPage })));
-const OrdersPage      = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrdersPage })));
+const OrdersPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrdersPage })));
 const OrderDetailPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrderDetailPage })));
-const ProfilePage     = lazy(() => import('./pages/ProfilePage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ZaloPayReturnPage = lazy(() => import('./pages/ZaloPayReturnPage'));
 
 // ── Admin pages ───────────────────────────────────────────────────────────────
-const AdminRoute       = lazy(() => import('./admin/AdminRoute'));
-const AdminLayout      = lazy(() => import('./admin/AdminLayout'));
-const AdminDashboard   = lazy(() => import('./admin/AdminDashboard'));
-const AdminBooks       = lazy(() => import('./admin/AdminBooks'));
-const AdminOrders      = lazy(() => import('./admin/AdminOrders').then(m => ({ default: m.default })));
+const AdminRoute = lazy(() => import('./admin/AdminRoute'));
+const AdminLayout = lazy(() => import('./admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./admin/AdminDashboard'));
+const AdminBooks = lazy(() => import('./admin/AdminBooks'));
+const AdminOrders = lazy(() => import('./admin/AdminOrders').then(m => ({ default: m.default })));
 const AdminOrderDetail = lazy(() => import('./admin/AdminOrders').then(m => ({ default: m.AdminOrderDetail })));
-const AdminCoupons     = lazy(() => import('./admin/AdminCoupons'));
-const AdminCategories  = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminCategories })));
-const AdminAuthors     = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminAuthors })));
-const AdminPublishers  = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminPublishers })));
+const AdminCoupons = lazy(() => import('./admin/AdminCoupons'));
+const AdminCategories = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminCategories })));
+const AdminAuthors = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminAuthors })));
+const AdminPublishers = lazy(() => import('./admin/AdminCatalog').then(m => ({ default: m.AdminPublishers })));
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -56,12 +56,13 @@ function AppLayout() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/payment/zalopay/return" element={<ZaloPayReturnPage />} />
+              <Route path="/auth/callback" element={<OAuth2CallbackPage />} />
 
               {/* ── Protected User ── */}
-              <Route path="/checkout"    element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-              <Route path="/orders"      element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-              <Route path="/orders/:id"  element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
-              <Route path="/profile"     element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
               {/* ── 404 ── */}
               <Route path="*" element={

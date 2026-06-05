@@ -4,8 +4,10 @@ import com.cdweb.bookstore.modules.product.model.Book;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
-@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"cart_id", "book_id"}))
+@Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = { "cart_id", "book_id" }))
 @Getter
 @Setter
 @Builder
@@ -27,4 +29,7 @@ public class CartItem {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal unitPrice;
 }

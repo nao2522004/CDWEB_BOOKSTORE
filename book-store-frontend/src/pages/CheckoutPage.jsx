@@ -27,6 +27,7 @@ export default function CheckoutPage() {
     isDefault: false
   });
   const [showNewAddr, setShowNewAddr] = useState(false);
+  const [editingAddrId, setEditingAddrId] = useState(null);
 
   useEffect(() => {
     addressAPI.getAll().then(r => {
@@ -49,8 +50,13 @@ export default function CheckoutPage() {
     }
   };
 
+  const FREE_SHIPPING_THRESHOLD = 300000;
+  const SHIPPING_FEE = 30000;
+
   const discount = couponData?.discountAmount || 0;
-  const finalPrice = Math.max(0, totalPrice - discount);
+  const subtotalAfterDiscount = Math.max(0, totalPrice - discount);
+  const shippingFee = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  const finalPrice = subtotalAfterDiscount + shippingFee;
 
   const handleOrder = async () => {
     if (!selectedAddress) {
@@ -104,6 +110,40 @@ export default function CheckoutPage() {
     setAddrErrors(e => ({ ...e, [key]: validateAddrField(key, value) }));
   };
 
+  const handleEditAddress = (addr, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setNewAddr({
+      fullName: addr.fullName,
+      phone: addr.phone,
+      street: addr.street,
+      province: addr.province,
+      district: addr.district,
+      ward: addr.ward,
+      isDefault: addr.isDefault
+    });
+    setEditingAddrId(addr.id);
+    setShowNewAddr(true);
+  };
+
+  const handleDeleteAddress = async (id, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!window.confirm('Bạn có chắc chắn muốn xóa địa sở này?')) return;
+    try {
+      await addressAPI.delete(id);
+      const addrsRes = await addressAPI.getAll();
+      const addrs = addrsRes.data || [];
+      setAddresses(addrs);
+      if (selectedAddress === id) {
+        const def = addrs.find(a => a.isDefault) || addrs[0];
+        setSelectedAddress(def ? def.id : null);
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const PHONE_REGEX = /^(0[35789])[0-9]{7,8}$/;
   const handleAddAddress = async (e) => {
     e.preventDefault();
@@ -113,15 +153,27 @@ export default function CheckoutPage() {
     }
     try {
       const payload = { ...newAddr, isDefault: !!newAddr.isDefault };
-      const res = await addressAPI.create(payload);
-      setAddresses(a => [...a, res.data]);
-      setSelectedAddress(res.data.id);
+      if (editingAddrId) {
+        await addressAPI.update(editingAddrId, payload);
+      } else {
+        const res = await addressAPI.create(payload);
+        setSelectedAddress(res.data.id);
+      }
+      const addrsRes = await addressAPI.getAll();
+      const addrs = addrsRes.data || [];
+      setAddresses(addrs);
+      if (!editingAddrId) {
+        const newlyCreated = addrs.find(a => a.fullName === payload.fullName && a.phone === payload.phone && a.street === payload.street);
+        if (newlyCreated) setSelectedAddress(newlyCreated.id);
+      }
       setShowNewAddr(false);
+      setEditingAddrId(null);
       setNewAddr({ fullName: '', phone: '', street: '', province: '', district: '', ward: '', isDefault: false });
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   if (!cart?.items?.length) return (
     <div className="bg-[#FAF5EC] min-h-[75vh] flex items-center justify-center px-4">
@@ -165,8 +217,9 @@ export default function CheckoutPage() {
 
               <div className="space-y-3 relative z-10">
                 {addresses.map(addr => (
-                  <label
+                  <div
                     key={addr.id}
+                    onClick={() => setSelectedAddress(addr.id)}
                     className={`flex items-start gap-4 p-4 rounded-[1px] border cursor-pointer transition-all duration-300 relative group ${selectedAddress === addr.id
                       ? 'border-[#8B6508] bg-[#8B6508]/5 shadow-sm'
                       : 'border-[#D4C4A8]/60 bg-transparent hover:border-[#8B6508]/40'
@@ -181,9 +234,29 @@ export default function CheckoutPage() {
                       className="mt-1 accent-[#8B6508]"
                     />
                     <div className="text-xs sm:text-sm flex-1">
-                      <p className="font-bold text-[#2C2114] uppercase tracking-wide" style={{ fontFamily: "'Cinzel', serif" }}>
-                        {addr.fullName} <span className="text-[#A8967E] font-mono tracking-normal px-1">·</span> {addr.phone}
-                      </p>
+                      <div className="flex justify-between items-start">
+                        <p className="font-bold text-[#2C2114] uppercase tracking-wide" style={{ fontFamily: "'Cinzel', serif" }}>
+                          {addr.fullName} <span className="text-[#A8967E] font-mono tracking-normal px-1">·</span> {addr.phone}
+                        </p>
+                        <div className="flex gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => handleEditAddress(addr, e)}
+                            className="text-[10px] uppercase tracking-wider font-bold text-stone-500 hover:text-[#8B6508]"
+                            style={{ fontFamily: "'Cinzel', serif" }}
+                          >
+                            Sửa
+                          </button>
+                          {!addr.isDefault && (
+                            <button
+                              onClick={(e) => handleDeleteAddress(addr.id, e)}
+                              className="text-[10px] uppercase tracking-wider font-bold text-stone-500 hover:text-red-700"
+                              style={{ fontFamily: "'Cinzel', serif" }}
+                            >
+                              Xóa
+                            </button>
+                          )}
+                        </div>
+                      </div>
                       <p className="text-stone-600 font-serif mt-1" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                         {addr.street}, {addr.ward}, {addr.district}, {addr.province}
                       </p>
@@ -193,7 +266,7 @@ export default function CheckoutPage() {
                         </span>
                       )}
                     </div>
-                  </label>
+                  </div>
                 ))}
 
                 <div className="pt-2">
@@ -209,6 +282,9 @@ export default function CheckoutPage() {
 
               {showNewAddr && (
                 <form onSubmit={handleAddAddress} className="mt-6 grid grid-cols-2 gap-4 relative z-10 border-t border-[#D4C4A8]/40 pt-6">
+                  <h3 className="col-span-2 text-xs uppercase tracking-wider font-bold text-[#8B6508] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                    {editingAddrId ? '✍️ Cập Nhật Địa Sở' : '📍 Thiết Lập Địa Sở Mới'}
+                  </h3>
                   {[
                     { key: 'fullName', label: 'Danh tính thụ nhân', col: 2 },
                     { key: 'phone', label: 'Liên lạc minh số', col: 1 },
@@ -263,7 +339,11 @@ export default function CheckoutPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShowNewAddr(false)}
+                      onClick={() => {
+                        setShowNewAddr(false);
+                        setEditingAddrId(null);
+                        setNewAddr({ fullName: '', phone: '', street: '', province: '', district: '', ward: '', isDefault: false });
+                      }}
                       className="h-10 text-stone-400 hover:text-red-800 text-xs font-bold uppercase tracking-[0.15em] px-6 border border-[#D4C4A8] hover:border-red-800/20 rounded-[1px] transition-all bg-transparent focus:outline-none"
                       style={{ fontFamily: "'Cinzel', serif" }}
                     >
@@ -379,8 +459,17 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between items-center">
                   <span>Phí vận cục</span>
-                  <span className="text-emerald-700 font-extrabold">Miễn ngân</span>
+                  {shippingFee === 0 ? (
+                    <span className="text-emerald-700 font-extrabold">Miễn ngân</span>
+                  ) : (
+                    <span className="font-sans font-normal text-xs text-[#2C2114]">{formatPrice(shippingFee)}</span>
+                  )}
                 </div>
+                {shippingFee > 0 && (
+                  <p className="text-[9px] text-stone-400 font-normal normal-case tracking-normal italic" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    ✦ Miễn phí vận chuyển cho đơn từ {formatPrice(FREE_SHIPPING_THRESHOLD)}
+                  </p>
+                )}
               </div>
 
               <div className="border-t border-[#D4C4A8] pt-4 mt-4 flex justify-between items-baseline font-bold text-[#2C2114]">

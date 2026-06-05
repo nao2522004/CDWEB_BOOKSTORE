@@ -21,16 +21,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CheckoutService {
 
-    private static final BigDecimal SHIPPING_FEE          = new BigDecimal("30000");
+    private static final BigDecimal SHIPPING_FEE = new BigDecimal("30000");
     private static final BigDecimal FREE_SHIPPING_THRESHOLD = new BigDecimal("300000");
 
-    private final UserRepository       userRepository;
-    private final CartRepository       cartRepository;
-    private final OrderRepository      orderRepository;
-    private final AddressRepository    addressRepository;
-    private final CouponRepository     couponRepository;
-    private final BookRepository       bookRepository;
-    private final CouponService        couponService;
+    private final UserRepository userRepository;
+    private final CartRepository cartRepository;
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
+    private final CouponRepository couponRepository;
+    private final BookRepository bookRepository;
+    private final CouponService couponService;
 
     @Transactional
     public OrderResponse checkout(Long userId, CheckoutRequest request) {
@@ -48,7 +48,8 @@ public class CheckoutService {
         BigDecimal subtotal = validateStockAndCalcSubtotal(cart.getItems());
 
         Address address = addressRepository.findByIdAndUserId(request.addressId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Địa chỉ giao hàng không tồn tại hoặc không thuộc về bạn"));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Địa chỉ giao hàng không tồn tại hoặc không thuộc về bạn"));
 
         BigDecimal shippingFee = calcShippingFee(subtotal);
 
@@ -103,8 +104,8 @@ public class CheckoutService {
 
     /**
      * Kiểm tra từng sản phẩm trong giỏ:
-     *  - Sách phải đang ACTIVE
-     *  - Tồn kho phải đủ
+     * - Sách phải đang ACTIVE
+     * - Tồn kho phải đủ
      * Đồng thời tính subtotal để tránh loop thêm lần nữa.
      */
     private BigDecimal validateStockAndCalcSubtotal(List<CartItem> items) {
@@ -121,10 +122,14 @@ public class CheckoutService {
             if (book.getStockQuantity() == null || book.getStockQuantity() < item.getQuantity()) {
                 int available = book.getStockQuantity() != null ? book.getStockQuantity() : 0;
                 throw new RuntimeException(
-                        "Sách \"" + book.getTitle() + "\" chỉ còn " + available + " cuốn trong kho (bạn đang chọn " + item.getQuantity() + ")");
+                        "Sách \"" + book.getTitle() + "\" chỉ còn " + available + " cuốn trong kho (bạn đang chọn "
+                                + item.getQuantity() + ")");
             }
 
-            subtotal = subtotal.add(book.getEffectivePrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            BigDecimal unitPrice = item.getUnitPrice() != null
+                    ? item.getUnitPrice()
+                    : book.getEffectivePrice();
+            subtotal = subtotal.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
         }
 
         return subtotal;
@@ -141,14 +146,19 @@ public class CheckoutService {
 
     /**
      * Build snapshot địa chỉ thành 1 chuỗi text.
-     * Lưu dạng text để đơn hàng không bị ảnh hưởng khi user sau này chỉnh sửa địa chỉ.
+     * Lưu dạng text để đơn hàng không bị ảnh hưởng khi user sau này chỉnh sửa địa
+     * chỉ.
      */
     private String buildAddressSnapshot(Address address) {
         List<String> parts = new ArrayList<>();
-        if (address.getStreet()   != null) parts.add(address.getStreet());
-        if (address.getWard()     != null) parts.add(address.getWard());
-        if (address.getDistrict() != null) parts.add(address.getDistrict());
-        if (address.getProvince() != null) parts.add(address.getProvince());
+        if (address.getStreet() != null)
+            parts.add(address.getStreet());
+        if (address.getWard() != null)
+            parts.add(address.getWard());
+        if (address.getDistrict() != null)
+            parts.add(address.getDistrict());
+        if (address.getProvince() != null)
+            parts.add(address.getProvince());
         return String.join(", ", parts);
     }
 
@@ -158,11 +168,15 @@ public class CheckoutService {
     private List<OrderItem> buildOrderItems(List<CartItem> cartItems, Order order) {
         return cartItems.stream().map(item -> {
             Book book = item.getBook();
+            // Dùng unitPrice snapshot từ giỏ hàng, không gọi lại getEffectivePrice()
+            BigDecimal unitPrice = item.getUnitPrice() != null
+                    ? item.getUnitPrice()
+                    : book.getEffectivePrice();
             return OrderItem.builder()
                     .order(order)
                     .book(book)
                     .quantity(item.getQuantity())
-                    .unitPrice(book.getEffectivePrice())
+                    .unitPrice(unitPrice)
                     .bookTitleSnapshot(book.getTitle())
                     .bookCoverSnapshot(book.getCoverUrl())
                     .build();
@@ -171,7 +185,8 @@ public class CheckoutService {
 
     /**
      * Trừ tồn kho bằng atomic UPDATE.
-     * Nếu trả về 0 dòng bị ảnh hưởng → tồn kho đã thay đổi giữa bước validate và bước này
+     * Nếu trả về 0 dòng bị ảnh hưởng → tồn kho đã thay đổi giữa bước validate và
+     * bước này
      * (race condition) → ném exception để rollback toàn bộ transaction.
      */
     private void decreaseStockOrThrow(List<CartItem> items) {
@@ -180,7 +195,7 @@ public class CheckoutService {
             if (rowsAffected == 0) {
                 throw new RuntimeException(
                         "Không thể trừ tồn kho cho sách \"" + item.getBook().getTitle() +
-                        "\" — tồn kho đã thay đổi. Vui lòng kiểm tra lại giỏ hàng");
+                                "\" — tồn kho đã thay đổi. Vui lòng kiểm tra lại giỏ hàng");
             }
         }
     }
