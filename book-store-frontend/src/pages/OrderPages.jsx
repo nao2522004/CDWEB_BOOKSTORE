@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
-import { orderAPI } from '../api';
+import { orderAPI, paymentAPI } from '../api';
 import { formatPrice, formatDate, getOrderStatusColor, getOrderStatusLabel, getPaymentStatusLabel, PLACEHOLDER_BOOK } from '../utils';
 import { Spinner, Pagination } from '../components/common';
 
@@ -100,6 +100,11 @@ export function OrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [zaloPayLoading, setZaloPayLoading] = useState(false);
+  const [zaloPayError, setZaloPayError] = useState('');
+
+  // Lấy cờ từ state: đơn ZALOPAY vừa được tạo, chờ thanh toán
+  const pendingZaloPay = location.state?.pendingPayment && location.state?.zalopay;
 
   useEffect(() => {
     orderAPI.getById(id).then(r => setOrder(r.data)).catch(() => { }).finally(() => setLoading(false));
@@ -115,6 +120,24 @@ export function OrderDetailPage() {
     finally { setCancelling(false); }
   };
 
+  const handleZaloPayNow = async () => {
+    setZaloPayLoading(true);
+    setZaloPayError('');
+    try {
+      const res = await paymentAPI.zaloPayInit(id);
+      const orderUrl = res?.data?.orderUrl;
+      if (orderUrl) {
+        window.location.href = orderUrl;
+      } else {
+        setZaloPayError('Không nhận được đường dẫn thanh toán từ ZaloPay.');
+      }
+    } catch (err) {
+      setZaloPayError(err.message || 'Khởi tạo thanh toán thất bại.');
+    } finally {
+      setZaloPayLoading(false);
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-28 bg-[#FAF5EC] min-h-screen"><Spinner size="lg" /></div>;
   if (!order) return (
     <div className="text-center py-28 bg-[#FAF5EC] min-h-screen text-stone-500 font-serif italic" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
@@ -126,10 +149,47 @@ export function OrderDetailPage() {
     <div className="bg-[#FAF5EC] min-h-screen text-[#2C2114] selection:bg-[#E6CE9A]/50 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
-        {location.state?.success && (
+        {/* Banner đơn thường */}
+        {location.state?.success && !location.state?.zalopay && (
           <div className="bg-emerald-50 border-2 border-emerald-700/30 text-emerald-950 px-5 py-4 rounded-[1px] mb-8 text-center text-xs uppercase tracking-widest font-bold relative" style={{ fontFamily: "'Cinzel', serif" }}>
             <div className="absolute inset-0.5 border border-emerald-750/5 pointer-events-none" />
             ❖ Khởi trạng hoàn tất! Bản ký đã được nghi nhận vào hệ thống tàng thư quốc gia.
+          </div>
+        )}
+
+        {/* Banner ZaloPay — chờ thanh toán */}
+        {(pendingZaloPay || (order?.paymentMethod === 'ZALOPAY' && order?.paymentStatus === 'PENDING')) && (
+          <div className="bg-blue-50 border-2 border-blue-400/40 text-blue-900 px-5 py-5 rounded-[1px] mb-8 relative" style={{ fontFamily: "'Cinzel', serif" }}>
+            <div className="absolute inset-0.5 border border-blue-300/10 pointer-events-none" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs font-black">Z</span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-blue-700">
+                    Đơn Hàng Chưa Thanh Toán
+                  </p>
+                  <p className="text-[11px] font-serif italic text-blue-600 mt-0.5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    Quý khách chưa hoàn tất thanh toán qua ZaloPay.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleZaloPayNow}
+                disabled={zaloPayLoading}
+                className="relative h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] uppercase tracking-[0.15em] px-5 rounded-[1px] transition-all flex-shrink-0 disabled:opacity-50 flex items-center gap-2 focus:outline-none"
+              >
+                {zaloPayLoading ? (
+                  <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" /> Đang tại...</>
+                ) : (
+                  <>💳 Thanh Toán Ngay</>
+                )}
+              </button>
+            </div>
+            {zaloPayError && (
+              <p className="text-red-600 text-[10px] font-serif italic mt-3">{zaloPayError}</p>
+            )}
           </div>
         )}
 

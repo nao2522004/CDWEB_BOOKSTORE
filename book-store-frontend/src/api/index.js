@@ -233,6 +233,11 @@ export const orderAPI = {
   cancel: (id) => request("PATCH", `/orders/${id}/cancel`),
 };
 
+export const paymentAPI = {
+  zaloPayInit: (orderId) => request("POST", `/payment/zalopay/init/${orderId}`),
+  zaloPayStatus: (orderId) => request("GET", `/payment/zalopay/status/${orderId}`),
+};
+
 export const couponAPI = {
   validate: (code, subtotal) =>
     request("GET", "/coupons/preview", null, { code, subtotal }),

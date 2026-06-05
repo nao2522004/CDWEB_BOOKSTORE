@@ -1,6 +1,5 @@
 package com.cdweb.bookstore.modules.order.service;
 
-import com.cdweb.bookstore.common.exception.ResourceNotFoundException;
 import com.cdweb.bookstore.modules.order.dto.CouponValidationResponse;
 import com.cdweb.bookstore.modules.order.model.Coupon;
 import com.cdweb.bookstore.modules.order.model.CouponUsage;
@@ -48,7 +47,8 @@ public class CouponService {
 
     /**
      * Kiểm tra tính hợp lệ của coupon ở thời điểm checkout.
-     * Coupon phải được load bằng findByCodeForUpdate (đã lock) trước khi gọi hàm này.
+     * Coupon phải được load bằng findByCodeForUpdate (đã lock) trước khi gọi hàm
+     * này.
      *
      * @throws RuntimeException nếu coupon không hợp lệ
      */
