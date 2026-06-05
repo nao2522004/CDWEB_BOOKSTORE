@@ -43,12 +43,19 @@ export function AuthProvider({ children }) {
     return res?.data;
   }, []);
 
+  const loginWithToken = useCallback(async (token) => {
+    if (token) localStorage.setItem('accessToken', token);
+    const me = await authAPI.me();
+    setUser(me?.data);
+    return me?.data;
+  }, []);
+
   const register = useCallback(async (data) => {
     return authAPI.register(data);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithToken, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

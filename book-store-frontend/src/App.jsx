@@ -14,9 +14,11 @@ const CartPage        = lazy(() => import('./pages/CartPage'));
 const CheckoutPage    = lazy(() => import('./pages/CheckoutPage'));
 const LoginPage       = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.LoginPage })));
 const RegisterPage    = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.RegisterPage })));
+const OAuth2CallbackPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.OAuth2CallbackPage })));
 const OrdersPage      = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrdersPage })));
 const OrderDetailPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrderDetailPage })));
 const ProfilePage     = lazy(() => import('./pages/ProfilePage'));
+const ZaloPayReturnPage = lazy(() => import('./pages/ZaloPayReturnPage'));
 
 // ── Admin pages ───────────────────────────────────────────────────────────────
 const AdminRoute       = lazy(() => import('./admin/AdminRoute'));
@@ -53,6 +55,7 @@ function AppLayout() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/payment/zalopay/return" element={<ZaloPayReturnPage />} />
 
               {/* ── Protected User ── */}
               <Route path="/checkout"    element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />

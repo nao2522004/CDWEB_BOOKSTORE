@@ -1,9 +1,9 @@
 package com.cdweb.bookstore.config;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -15,31 +15,45 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Base64;
 
+/**
+ * SecurityConfig — HTTP security, CORS, OAuth2 login.
+ *
+ * JWT beans (JwtEncoder/JwtDecoder/JwtAuthenticationConverter) đã được tách
+ * sang JwtConfig để tránh circular dependency:
+ *   SecurityConfig → GoogleOAuth2SuccessHandler → JwtService → JwtEncoder
+ *   → (trước đây định nghĩa trong SecurityConfig) → CYCLE
+ *
+ * Giờ JwtConfig độc lập, SecurityConfig nhận JwtDecoder/JwtAuthenticationConverter
+ * qua method injection trong securityFilterChain().
+ *
+ * @Lazy trên GoogleOAuth2SuccessHandler để Spring khởi tạo nó sau,
+ * tránh trường hợp vẫn còn phụ thuộc vòng (dự phòng).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtProperties jwtProperties;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    // fix cors (cross origin resource sharing)
+    /**
+     * @Lazy: khởi tạo GoogleOAuth2SuccessHandler sau khi tất cả các bean khác
+     * đã sẵn sàng, đảm bảo JwtService (phụ thuộc JwtEncoder từ JwtConfig)
+     * được inject đúng thứ tự.
+     */
+    @Lazy
+    private final GoogleOAuth2SuccessHandler googleOAuth2SuccessHandler;
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -48,77 +62,73 @@ public class SecurityConfig {
                 Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
                 Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-        // Cho phep gui cookies từ frontend lên backend
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // @formatter:off
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(s -> s
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-
-                        // ── PUBLIC (không cần đăng nhập) ─────────────────────────────
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Chỉ GET books/categories là public; write do admin controller đảm nhận
-                        .requestMatchers(HttpMethod.GET, 
-                                "/books", "/books/**", 
-                                "/categories", "/categories/**", 
-                                "/authors", "/authors/**", 
-                                "/publishers", "/publishers/**").permitAll()
-
-                        // ── ADMIN (/admin/**) ─────────────────────────────────────────
-                        // Tất cả endpoint dưới /admin/ đều yêu cầu ROLE_ADMIN.
-                        // @PreAuthorize tại controller là lớp bảo vệ thứ 2 (defense in depth).
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // ── USER (đã đăng nhập) ───────────────────────────────────────
-                        .requestMatchers("/cart/**").authenticated()
-                        .requestMatchers("/orders/**").authenticated()
-                        .requestMatchers("/coupons/preview").authenticated()
-
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                        )
-                );
-        return http.build();
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(secretKey()).build();
-    }
-
-    @Bean
-    public JwtEncoder jwtEncoder() {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey()));
-    }
-
     /**
-     * Map claim "roles" → GrantedAuthority (không thêm prefix SCOPE_ mặc định)
+     * JwtDecoder và JwtAuthenticationConverter được inject qua parameter
+     * (không phải field) để Spring giải quyết sau khi JwtConfig đã khởi tạo.
      */
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-        grantedAuthoritiesConverter.setAuthorityPrefix("");
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtDecoder jwtDecoder,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+        // @formatter:off
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            // OAuth2 flow cần session tạm thời trong suốt redirect — IF_REQUIRED
+            // API calls vẫn stateless vì dùng JWT Bearer token
+            .sessionManagement(s -> s
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .authorizeHttpRequests(auth -> auth
 
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return converter;
+                // ── PUBLIC ──────────────────────────────────────────────────
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers(HttpMethod.GET, "/books/**", "/categories/**",
+                        "/authors/**", "/publishers/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/books/**", "/categories/**",
+                        "/authors/**", "/publishers/**").permitAll()
+
+                // ZaloPay callback — ZaloPay server gọi trực tiếp, không có JWT
+                // Bảo mật qua xác thực MAC chữ ký trong ZaloPayPaymentService
+                .requestMatchers(HttpMethod.POST, "/payment/zalopay/callback").permitAll()
+
+                // ── ADMIN ────────────────────────────────────────────────────
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                // ── USER (đã đăng nhập) ───────────────────────────────────────
+                .requestMatchers("/cart/**").authenticated()
+                .requestMatchers("/orders/**").authenticated()
+                .requestMatchers("/coupons/preview").authenticated()
+                .requestMatchers("/payment/**").authenticated()
+                .requestMatchers("/addresses/**").authenticated()
+
+                .anyRequest().authenticated()
+            )
+            // ── JWT Resource Server (cho API calls) ──────────────────────────
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                    .decoder(jwtDecoder)
+                    .jwtAuthenticationConverter(jwtAuthenticationConverter)
+                )
+            )
+            // ── Google OAuth2 Login ───────────────────────────────────────────
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(googleOAuth2SuccessHandler)
+                .failureUrl("/auth/oauth2/failure")
+            );
+        // @formatter:on
+        return http.build();
     }
 
     @Bean
@@ -131,8 +141,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private SecretKey secretKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.getBase64Secret());
-        return new SecretKeySpec(keyBytes, 0, keyBytes.length, JwtService.JWT_ALGORITHM.getName());
+    /** RestTemplate dùng cho ZaloPay API calls */
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

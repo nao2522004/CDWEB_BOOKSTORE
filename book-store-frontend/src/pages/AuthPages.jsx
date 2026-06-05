@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ErrorMsg, Spinner } from '../components/common';
 
@@ -97,6 +97,19 @@ export function LoginPage() {
               {loading ? <><Spinner size="sm" /> Đang thông quan...</> : 'Đăng nhập'}
             </button>
           </form>
+
+          <div className="mt-4">
+            <a
+              href="http://localhost:8080/oauth2/authorization/google"
+              className="w-full border border-[#8B6508] hover:bg-[#8B6508]/5 text-[#8B6508] font-bold py-3 px-4 transition-all duration-300 flex items-center justify-center gap-2.5 uppercase tracking-[0.15em] text-[10px] rounded-[1px]"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12.24 10.285V13.4h6.887C18.2 15.614 15.645 18 12.24 18c-3.86 0-7-3.14-7-7s3.14-7 7-7c1.7 0 3.23.61 4.43 1.616l2.435-2.437C17.585 1.737 15.11 1 12.24 1c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.77 0 9.6-4.053 9.6-9.773 0-.66-.06-1.297-.17-1.942H12.24z"/>
+              </svg>
+              Đăng nhập bằng Google
+            </a>
+          </div>
 
           <div className="text-center mt-6 pt-6 border-t border-[#C4B498]/40">
             <p className="text-xs font-serif text-stone-500">
@@ -201,6 +214,68 @@ export function RegisterPage() {
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+export function OAuth2CallbackPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { loginWithToken } = useAuth();
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const authError = searchParams.get('error');
+
+    if (token) {
+      loginWithToken(token)
+        .then(() => {
+          navigate('/', { replace: true });
+        })
+        .catch(err => {
+          setError(err.message || 'Không thể đồng bộ thông tin tài khoản.');
+        });
+    } else if (authError) {
+      setError(authError === 'user_not_found' ? 'Không tìm thấy tài khoản người dùng.' : 'Xác thực Google thất bại.');
+    } else {
+      setError('Tham số xác thực không hợp lệ.');
+    }
+  }, [searchParams, loginWithToken, navigate]);
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-16 bg-[#FAF3E3] selection:bg-[#E6CE9A]">
+      <div className="w-full max-w-md bg-[#FAF3E3] border border-[#C4B498] shadow-[0_15px_50px_rgba(38,28,18,0.1)] p-8 text-center relative">
+        <div className="absolute inset-2 border border-[#8B6508]/10 pointer-events-none" />
+        
+        {error ? (
+          <div className="space-y-6">
+            <h2 className="text-xl font-serif font-bold text-red-600" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Xác Thực Thất Bại
+            </h2>
+            <ErrorMsg message={error} />
+            <Link
+              to="/login"
+              className="inline-block bg-[#8B6508] hover:bg-[#A67B1E] text-white font-bold py-2.5 px-6 transition-all duration-300 uppercase tracking-widest text-[10px] rounded-[1px]"
+              style={{ fontFamily: "'Cinzel', serif" }}
+            >
+              Quay lại Đăng nhập
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6 py-6">
+            <div className="flex justify-center">
+              <Spinner size="lg" />
+            </div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#8B6508] font-bold" style={{ fontFamily: "'Cinzel', serif" }}>
+              Đang xác thực tài khoản Google...
+            </p>
+            <p className="text-stone-500 text-xs font-serif italic" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              Hệ thống đang thiết lập phiên đăng nhập của bạn.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

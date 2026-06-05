@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addressAPI, couponAPI, orderAPI } from '../api';
+import { addressAPI, couponAPI, orderAPI, paymentAPI } from '../api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../utils';
@@ -66,8 +66,25 @@ export default function CheckoutPage() {
         couponCode: couponData ? couponCode : undefined,
         note: note || undefined,
       });
+      const orderId = res.data.id;
       await clearCart();
-      navigate(`/orders/${res.data.id}`, { state: { success: true } });
+
+      if (paymentMethod === 'ZALOPAY') {
+        // Khởi tạo thanh toán ZaloPay → redirect sang cổng thanh toán
+        try {
+          const payRes = await paymentAPI.zaloPayInit(orderId);
+          const orderUrl = payRes?.data?.orderUrl;
+          if (orderUrl) {
+            window.location.href = orderUrl; // redirect ra ngoài app
+            return;
+          }
+        } catch {
+          // Nếu init thất bại, vẫn chuyển về trang đơn hàng để thử lại
+        }
+        navigate(`/orders/${orderId}`, { state: { success: true, zalopay: true, pendingPayment: true } });
+      } else {
+        navigate(`/orders/${orderId}`, { state: { success: true } });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
