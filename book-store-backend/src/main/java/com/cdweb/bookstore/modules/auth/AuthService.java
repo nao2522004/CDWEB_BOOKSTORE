@@ -108,4 +108,19 @@ public class AuthService {
         userRepository.save(user);
         return RegisterResponse.fromUser(user);
     }
+
+    // ─── Change Password ──────────────────────────────────────────────────────
+
+    @Transactional
+    public void changePassword(Long userId, com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+        }
+        
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+    }
 }

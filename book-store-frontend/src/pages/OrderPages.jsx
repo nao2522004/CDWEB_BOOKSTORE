@@ -156,15 +156,15 @@ export function OrderDetailPage() {
               <div key={item.bookId} className="flex gap-4 items-center border-b border-[#D4C4A8]/20 pb-4 last:border-0 last:pb-0">
                 <div className="border border-[#D4C4A8]/60 p-1 bg-white aspect-[3/4] w-12 flex-shrink-0">
                   <img
-                    src={item.coverImageUrl || PLACEHOLDER_BOOK}
-                    alt={item.bookTitle}
+                    src={item.bookCoverSnapshot || PLACEHOLDER_BOOK}
+                    alt={item.bookTitleSnapshot}
                     className="w-full h-full object-cover"
                     onError={e => { e.target.src = PLACEHOLDER_BOOK; }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-serif font-bold text-sm text-[#2C2114] line-clamp-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    {item.bookTitle}
+                    {item.bookTitleSnapshot}
                   </p>
                   <p className="text-[11px] text-stone-500 font-mono mt-0.5">
                     Số lượng: {item.quantity} × {formatPrice(item.unitPrice)}

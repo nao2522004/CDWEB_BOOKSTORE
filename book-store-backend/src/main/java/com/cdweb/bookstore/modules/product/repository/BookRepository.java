@@ -20,10 +20,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     boolean existsBySlug(String slug);
 
     @Query("SELECT b FROM Book b WHERE " +
-            ":keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "(b.isDeleted IS NULL OR b.isDeleted = false) AND " +
+            "(:categoryId IS NULL OR b.category.id = :categoryId) AND " +
+            "(:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(b.slug) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Book> searchBooks(@Param("keyword") String keyword, Pageable pageable);
+            "OR LOWER(b.slug) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Book> searchBooks(@Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
     /**
      * Trừ tồn kho ATOMIC: Chống Race Condition bằng cách gộp "Kiểm tra & Cập nhật"
      * vào 1 câu lệnh duy nhất dưới DB.
