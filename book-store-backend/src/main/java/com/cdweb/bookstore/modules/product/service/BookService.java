@@ -68,6 +68,17 @@ public class BookService {
                 .authors(authors)
                 .build();
 
+        String coverUrl = dto.getCoverUrl() != null ? dto.getCoverUrl() : dto.getCoverImageUrl();
+        if (coverUrl != null && !coverUrl.isBlank()) {
+            BookImage cover = BookImage.builder()
+                    .book(book)
+                    .imageUrl(coverUrl.trim())
+                    .isCover(true)
+                    .sortOrder(0)
+                    .build();
+            book.getImages().add(cover);
+        }
+
         return toDTO(bookRepository.save(book));
     }
 
@@ -173,6 +184,26 @@ public class BookService {
             }
             book.setAuthors(authors);
         }
+
+        String incomingUrl = dto.getCoverUrl() != null ? dto.getCoverUrl() : dto.getCoverImageUrl();
+        if (incomingUrl != null) {
+            if (incomingUrl.isBlank()) {
+                book.getImages().removeIf(BookImage::isCover);
+            } else {
+                boolean hasSameCover = book.getImages().stream()
+                        .anyMatch(img -> img.isCover() && incomingUrl.equals(img.getImageUrl()));
+                if (!hasSameCover) {
+                    book.getImages().removeIf(BookImage::isCover);
+                    BookImage newCover = BookImage.builder()
+                            .book(book)
+                            .imageUrl(incomingUrl.trim())
+                            .isCover(true)
+                            .sortOrder(0)
+                            .build();
+                    book.getImages().add(newCover);
+                }
+            }
+        }
     }
 
     private BookDTO toDTO(Book book) {
@@ -221,6 +252,7 @@ public class BookService {
                 .publishedDate(book.getPublishedDate())
                 .status(book.getStatus())
                 .coverImageUrl(book.getCoverUrl())
+                .coverUrl(book.getCoverUrl())
                 .authors(authorDTOs)
                 .publisher(publisherDTO)
                 .categories(categoryDTOs)

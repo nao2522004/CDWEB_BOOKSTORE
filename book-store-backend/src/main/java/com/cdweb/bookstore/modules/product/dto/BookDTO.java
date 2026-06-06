@@ -29,6 +29,7 @@ public class BookDTO {
     private Book.Status status;
     private Boolean isDeleted;
     private String coverImageUrl;
+    private String coverUrl;
     private List<Long> authorIds;
     private List<AuthorDTO> authors;
     private PublisherDTO publisher;
