@@ -5,6 +5,7 @@ import {
   FormField, AdminInput, AdminTextarea, AdminSelect, StatusBadge,
   useConfirm, AdminPagination, useAdminToast,
 } from './AdminComponents';
+import ImageUploader from '../components/common/ImageUploader';
 
 const STATUS_MAP = {
   ACTIVE: { label: 'Đang Bán', colorClass: 'bg-green-100 text-green-800 border-green-200' },
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
   price: '', discountPrice: '', stockQuantity: '',
   pages: '', language: 'vi', categoryId: '', publisherId: '',
   publishedDate: '', status: 'ACTIVE', authorIds: [],
+  coverUrl: '',
 };
 
 function slugify(str) {
@@ -84,6 +86,7 @@ export default function AdminBooks() {
       publishedDate: book.publishedDate ? book.publishedDate.split('T')[0] : '',
       status: book.status || 'ACTIVE',
       authorIds: book.authorIds || [],
+      coverUrl: book.coverImageUrl || '',
     });
     setModalOpen(true);
   };
@@ -102,6 +105,7 @@ export default function AdminBooks() {
         publisherId: form.publisherId ? parseInt(form.publisherId) : null,
         publishedDate: form.publishedDate ? new Date(form.publishedDate).toISOString() : null,
         authorIds: form.authorIds.map(Number),
+        coverUrl: form.coverUrl || null,
       };
       if (editing) {
         await adminAPI.books.update(editing.id, payload);
@@ -146,12 +150,25 @@ export default function AdminBooks() {
       key: 'title',
       label: 'TÊN SÁCH / ẤN BẢN',
       render: (v, row) => (
-        <div className="max-w-md py-1">
-          <p className="font-bold text-[#140E0A] text-base leading-tight hover:text-[#8B6508] transition-colors duration-200"
-            style={{ fontFamily: "'Playfair Display', serif" }}>{v}</p>
-          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-stone-500 font-mono">
-            <span className="bg-stone-100 px-1.5 py-0.5 rounded">ISBN: {row.isbn || 'N/A'}</span>
-            {row.language && <span className="uppercase border-l border-stone-300 pl-3">{row.language}</span>}
+        <div className="flex items-center gap-3 py-1">
+          {row.coverImageUrl ? (
+            <img
+              src={row.coverImageUrl}
+              alt={v}
+              className="w-10 h-14 object-cover rounded shadow-sm border border-stone-200/60 flex-shrink-0"
+            />
+          ) : (
+            <div className="w-10 h-14 bg-stone-100 flex items-center justify-center rounded border border-dashed border-stone-300 text-stone-400 flex-shrink-0">
+              <span className="text-[10px] font-serif">N/A</span>
+            </div>
+          )}
+          <div className="max-w-md">
+            <p className="font-bold text-[#140E0A] text-base leading-tight hover:text-[#8B6508] transition-colors duration-200"
+              style={{ fontFamily: "'Playfair Display', serif" }}>{v}</p>
+            <div className="flex items-center gap-3 mt-1.5 text-[11px] text-stone-500 font-mono">
+              <span className="bg-stone-100 px-1.5 py-0.5 rounded">ISBN: {row.isbn || 'N/A'}</span>
+              {row.language && <span className="uppercase border-l border-stone-300 pl-3">{row.language}</span>}
+            </div>
           </div>
         </div>
       )
@@ -251,22 +268,33 @@ export default function AdminBooks() {
           {/* Nhóm Thông tin chính */}
           <div className="bg-[#FAF8F5] p-4 rounded-lg border border-[#D4C4A8]/40 space-y-4">
             <h4 className="text-xs font-bold tracking-widest text-[#8B6508] uppercase border-b border-[#D4C4A8]/30 pb-1.5 font-serif">Thông tin cơ bản</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField label="Tên Sách" required>
-                <AdminInput
-                  value={form.title}
-                  onChange={v => setForm(f => ({ ...f, title: v, slug: f.slug || slugify(v) }))}
-                  placeholder="Ví dụ: Số Đỏ (Ấn bản kỷ niệm)"
-                />
-              </FormField>
-              <FormField label="Slug đường dẫn (Tự động)" required>
-                <AdminInput
-                  value={form.slug}
-                  onChange={v => setForm(f => ({ ...f, slug: v }))}
-                  placeholder="so-do-an-ban-ky-niem"
-                  className="font-mono text-xs bg-stone-50 text-stone-600"
-                />
-              </FormField>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-1 flex justify-center md:justify-start">
+                <FormField label="Ảnh Bìa Sách">
+                  <ImageUploader
+                    value={form.coverUrl}
+                    onChange={url => setForm(f => ({ ...f, coverUrl: url }))}
+                    disabled={submitting}
+                  />
+                </FormField>
+              </div>
+              <div className="md:col-span-2 space-y-4">
+                <FormField label="Tên Sách" required>
+                  <AdminInput
+                    value={form.title}
+                    onChange={v => setForm(f => ({ ...f, title: v, slug: f.slug || slugify(v) }))}
+                    placeholder="Ví dụ: Số Đỏ (Ấn bản kỷ niệm)"
+                  />
+                </FormField>
+                <FormField label="Slug đường dẫn (Tự động)" required>
+                  <AdminInput
+                    value={form.slug}
+                    onChange={v => setForm(f => ({ ...f, slug: v }))}
+                    placeholder="so-do-an-ban-ky-niem"
+                    className="font-mono text-xs bg-stone-50 text-stone-600"
+                  />
+                </FormField>
+              </div>
             </div>
           </div>
 
