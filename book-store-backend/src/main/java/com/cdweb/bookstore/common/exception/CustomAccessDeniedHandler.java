@@ -25,7 +25,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,
-			AccessDeniedException accessDeniedException) throws IOException {
+					   AccessDeniedException accessDeniedException) throws IOException {
 
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		response.setContentType("application/json;charset=UTF-8");
@@ -35,7 +35,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 				  "status": 403,
 				  "error": "FORBIDDEN",
 				  "data": null,
-				  "message": "Bạn không có quyền truy cập tài nguyên này",
+				  "message": "Bạn không có quyền truy cập tài nguyên này"
 				}
 				""";
 
