@@ -17,12 +17,11 @@ export default function AdminRoute({ children }) {
   if (!user) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
-
   const isAdmin = user.roles?.includes('ROLE_ADMIN');
 
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+    if (!isAdmin) {
+      return <Navigate to="/" replace />;
+    }
 
   return children;
 }
