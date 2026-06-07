@@ -103,7 +103,12 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("Email đã được sử dụng");
         }
-        User user = User.builder().name(request.name()).email(request.email()).password(passwordEncoder.encode(request.password())).provider(User.Provider.LOCAL).roles(Set.of(Role.builder().id(1L).name("USER").build())) // default role
+        User user = User.builder()
+                .name(request.name())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .provider(User.Provider.LOCAL)
+                .roles(Set.of(Role.builder().id(1L).name("USER").build()))
                 .build();
         userRepository.save(user);
         return RegisterResponse.fromUser(user);
