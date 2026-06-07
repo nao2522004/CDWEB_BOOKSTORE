@@ -19,19 +19,15 @@ export function OrdersPage() {
   }, []);
 
   const ordersList = Array.isArray(orders) ? orders : (orders?.content || []);
-  
-  // Client-side pagination if backend returns full list
   const totalPages = Math.ceil(ordersList.length / itemsPerPage);
   const paginatedOrders = ordersList.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   return (
     <div className="bg-[#FAF5EC] min-h-screen text-[#2C2114] selection:bg-[#E6CE9A]/50 pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-
         <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#140E0A] tracking-wide border-b border-[#D4C4A8] pb-5 mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
           Lịch Sử Tông Ký (Quản Lý Đơn Hàng)
         </h1>
-
         {loading ? (
           <div className="flex justify-center py-28"><Spinner size="lg" /></div>
         ) : !ordersList.length ? (
@@ -44,11 +40,7 @@ export function OrdersPage() {
             <p className="text-stone-500 text-xs font-serif italic mb-8" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               Nơi đây chưa lưu vết bất kỳ giao dịch tàng thư hay điều phối mộc bản nào.
             </p>
-            <Link
-              to="/books"
-              className="inline-block bg-[#8B6508] hover:bg-[#A67B1E] text-white px-8 py-3.5 text-xs font-bold uppercase tracking-widest rounded-[1px] transition-all shadow-sm"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
+            <Link to="/books" className="inline-block bg-[#8B6508] hover:bg-[#A67B1E] text-white px-8 py-3.5 text-xs font-bold uppercase tracking-widest rounded-[1px] transition-all shadow-sm" style={{ fontFamily: "'Cinzel', serif" }}>
               Khởi Sự Tầm Thư
             </Link>
           </div>
@@ -56,13 +48,8 @@ export function OrdersPage() {
           <>
             <div className="space-y-4">
               {paginatedOrders.map(order => (
-                <Link
-                  key={order.id}
-                  to={`/orders/${order.id}`}
-                  className="block bg-[#FAF5EC] border border-[#D4C4A8] p-5 shadow-sm hover:border-[#8B6508]/60 hover:shadow-md transition-all relative group"
-                >
+                <Link key={order.id} to={`/orders/${order.id}`} className="block bg-[#FAF5EC] border border-[#D4C4A8] p-5 shadow-sm hover:border-[#8B6508]/60 hover:shadow-md transition-all relative group">
                   <div className="absolute inset-1 border border-[#8B6508]/0 group-hover:border-[#8B6508]/5 pointer-events-none transition-all" />
-
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="font-bold text-sm text-[#140E0A] uppercase tracking-wider" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -76,7 +63,6 @@ export function OrdersPage() {
                       </span>
                     </div>
                   </div>
-
                   <div className="flex items-center justify-between pt-3 border-t border-[#D4C4A8]/30">
                     <p className="text-xs font-serif italic text-stone-500" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                       Thu thâu {order.items?.length || 0} mục văn bản
@@ -88,18 +74,11 @@ export function OrdersPage() {
                 </Link>
               ))}
             </div>
-
             {totalPages > 1 && (
               <div className="mt-8 flex justify-center gap-2">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`px-3 py-1 border rounded-[1px] text-xs font-mono font-bold transition-all ${page === pageNum
-                      ? 'bg-[#2C2114] text-[#FAF5EC] border-[#2C2114]'
-                      : 'border-[#D4C4A8] hover:bg-[#8B6508]/5 text-[#2C2114]'
-                      }`}
-                  >
+                  <button key={pageNum} onClick={() => setPage(pageNum)}
+                    className={`px-3 py-1 border rounded-[1px] text-xs font-mono font-bold transition-all ${page === pageNum ? 'bg-[#2C2114] text-[#FAF5EC] border-[#2C2114]' : 'border-[#D4C4A8] hover:bg-[#8B6508]/5 text-[#2C2114]'}`}>
                     {pageNum}
                   </button>
                 ))}
@@ -112,7 +91,6 @@ export function OrdersPage() {
   );
 }
 
-
 export function OrderDetailPage() {
   const { id } = useParams();
   const location = useLocation();
@@ -121,9 +99,6 @@ export function OrderDetailPage() {
   const [cancelling, setCancelling] = useState(false);
   const [zaloPayLoading, setZaloPayLoading] = useState(false);
   const [zaloPayError, setZaloPayError] = useState('');
-
-  // Lấy cờ từ state: đơn ZALOPAY vừa được tạo, chờ thanh toán
-  const pendingZaloPay = location.state?.pendingPayment && location.state?.zalopay;
 
   useEffect(() => {
     orderAPI.getById(id).then(r => setOrder(r.data)).catch(() => { }).finally(() => setLoading(false));
@@ -164,11 +139,17 @@ export function OrderDetailPage() {
     </div>
   );
 
+  // BUG FIX: paymentStatus enum là UNPAID/PAID/REFUNDED — không có PENDING.
+  // Điều kiện hiển thị banner ZaloPay chờ thanh toán phải check UNPAID.
+  const pendingZaloPay = location.state?.pendingPayment && location.state?.zalopay;
+  const showZaloPayBanner = (pendingZaloPay || (
+    order?.paymentMethod === 'ZALOPAY' && order?.paymentStatus === 'UNPAID'
+  )) && order?.status === 'PENDING';
+
   return (
     <div className="bg-[#FAF5EC] min-h-screen text-[#2C2114] selection:bg-[#E6CE9A]/50 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
 
-        {/* Banner đơn thường */}
         {location.state?.success && !location.state?.zalopay && (
           <div className="bg-emerald-50 border-2 border-emerald-700/30 text-emerald-950 px-5 py-4 rounded-[1px] mb-8 text-center text-xs uppercase tracking-widest font-bold relative" style={{ fontFamily: "'Cinzel', serif" }}>
             <div className="absolute inset-0.5 border border-emerald-750/5 pointer-events-none" />
@@ -176,8 +157,8 @@ export function OrderDetailPage() {
           </div>
         )}
 
-        {/* Banner ZaloPay — chờ thanh toán */}
-        {(pendingZaloPay || (order?.paymentMethod === 'ZALOPAY' && order?.paymentStatus === 'PENDING')) && (
+        {/* BUG FIX: dùng showZaloPayBanner đã sửa ở trên */}
+        {showZaloPayBanner && (
           <div className="bg-blue-50 border-2 border-blue-400/40 text-blue-900 px-5 py-5 rounded-[1px] mb-8 relative" style={{ fontFamily: "'Cinzel', serif" }}>
             <div className="absolute inset-0.5 border border-blue-300/10 pointer-events-none" />
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -194,21 +175,14 @@ export function OrderDetailPage() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={handleZaloPayNow}
-                disabled={zaloPayLoading}
-                className="relative h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] uppercase tracking-[0.15em] px-5 rounded-[1px] transition-all flex-shrink-0 disabled:opacity-50 flex items-center gap-2 focus:outline-none"
-              >
+              <button onClick={handleZaloPayNow} disabled={zaloPayLoading}
+                className="relative h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] uppercase tracking-[0.15em] px-5 rounded-[1px] transition-all flex-shrink-0 disabled:opacity-50 flex items-center gap-2 focus:outline-none">
                 {zaloPayLoading ? (
-                  <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" /> Đang tại...</>
-                ) : (
-                  <>💳 Thanh Toán Ngay</>
-                )}
+                  <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" /> Đang tải...</>
+                ) : <>💳 Thanh Toán Ngay</>}
               </button>
             </div>
-            {zaloPayError && (
-              <p className="text-red-600 text-[10px] font-serif italic mt-3">{zaloPayError}</p>
-            )}
+            {zaloPayError && <p className="text-red-600 text-[10px] font-serif italic mt-3">{zaloPayError}</p>}
           </div>
         )}
 
@@ -224,7 +198,6 @@ export function OrderDetailPage() {
           </span>
         </div>
 
-        {/* Items */}
         <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 mb-6 shadow-sm relative">
           <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
           <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#140E0A] mb-5 border-b border-[#D4C4A8]/40 pb-2" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -234,12 +207,8 @@ export function OrderDetailPage() {
             {order.items?.map(item => (
               <div key={item.bookId} className="flex gap-4 items-center border-b border-[#D4C4A8]/20 pb-4 last:border-0 last:pb-0">
                 <div className="border border-[#D4C4A8]/60 p-1 bg-white aspect-[3/4] w-12 flex-shrink-0">
-                  <img
-                    src={item.bookCoverSnapshot || PLACEHOLDER_BOOK}
-                    alt={item.bookTitleSnapshot}
-                    className="w-full h-full object-cover"
-                    onError={e => { e.target.src = PLACEHOLDER_BOOK; }}
-                  />
+                  <img src={item.bookCoverSnapshot || PLACEHOLDER_BOOK} alt={item.bookTitleSnapshot}
+                    className="w-full h-full object-cover" onError={e => { e.target.src = PLACEHOLDER_BOOK; }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-serif font-bold text-sm text-[#2C2114] line-clamp-1" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -258,7 +227,6 @@ export function OrderDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-          {/* Address — B2: backend trả fullName/street/province (không phải recipientName/address/city) */}
           <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
             <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
             <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#140E0A] mb-4 border-b border-[#D4C4A8]/40 pb-2" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -277,12 +245,12 @@ export function OrderDetailPage() {
             )}
           </div>
 
-          {/* Payment — B2: backend trả subtotal (không phải subtotalAmount) */}
           <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
             <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
             <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#140E0A] mb-4 border-b border-[#D4C4A8]/40 pb-2" style={{ fontFamily: "'Cinzel', serif" }}>
               💰 Đối Chiếu Ngân Khố
             </h2>
+            {/* BUG FIX: backend trả "subtotal" không phải "subtotalAmount" */}
             <div className="text-xs uppercase tracking-wider font-bold text-stone-600 space-y-2 relative z-10" style={{ fontFamily: "'Cinzel', serif" }}>
               <div className="flex justify-between items-center">
                 <span>Nguyên ngân tinh</span>
@@ -296,7 +264,9 @@ export function OrderDetailPage() {
               )}
               <div className="flex justify-between items-center">
                 <span>Vận chuyển cục</span>
-                <span className="text-emerald-700 font-extrabold">Miễn ngân</span>
+                <span className={order.shippingFee > 0 ? 'font-sans font-normal text-xs' : 'text-emerald-700 font-extrabold'}>
+                  {order.shippingFee > 0 ? formatPrice(order.shippingFee) : 'Miễn ngân'}
+                </span>
               </div>
               <div className="flex justify-between items-baseline text-[#140E0A] border-t border-[#D4C4A8]/40 pt-2 mt-2 font-extrabold">
                 <span className="text-[11px]">Tổng ngân tất yếu</span>
@@ -313,26 +283,17 @@ export function OrderDetailPage() {
         </div>
 
         <div className="flex items-center justify-between pt-4">
-          <Link
-            to="/orders"
-            className="text-xs uppercase tracking-widest font-extrabold text-[#8B6508] hover:text-[#A67B1E] transition-colors"
-            style={{ fontFamily: "'Cinzel', serif" }}
-          >
+          <Link to="/orders" className="text-xs uppercase tracking-widest font-extrabold text-[#8B6508] hover:text-[#A67B1E] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>
             ← Bản Sách Tổng Ký
           </Link>
-
           {order.status === 'PENDING' && (
-            <button
-              onClick={handleCancel}
-              disabled={cancelling}
+            <button onClick={handleCancel} disabled={cancelling}
               className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-[1px] transition-colors disabled:opacity-40 focus:outline-none"
-              style={{ fontFamily: "'Cinzel', serif" }}
-            >
+              style={{ fontFamily: "'Cinzel', serif" }}>
               {cancelling ? 'Đang Khấu Trục...' : '✕ Trục Xuất Đơn Đặt'}
             </button>
           )}
         </div>
-
       </div>
     </div>
   );
