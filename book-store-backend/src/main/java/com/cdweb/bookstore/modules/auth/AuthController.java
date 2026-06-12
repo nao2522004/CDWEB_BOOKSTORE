@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest;
+import com.cdweb.bookstore.modules.auth.dto.ForgotPasswordRequest;
+import com.cdweb.bookstore.modules.auth.dto.ResetPasswordRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -71,6 +73,20 @@ public class AuthController {
             @AuthenticationPrincipal Jwt jwt) {
         authService.changePassword(extractUserId(jwt), request);
         return ApiResponse.ok(null, "Thay đổi mật khẩu thành công");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.email());
+        return ApiResponse.ok(null, "Yêu cầu khôi phục mật khẩu đã được gửi. Vui lòng kiểm tra email.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ApiResponse.ok(null, "Khôi phục mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.");
     }
 
     private Long extractUserId(Jwt jwt) {

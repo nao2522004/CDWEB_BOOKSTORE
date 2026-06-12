@@ -36,6 +36,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final com.cdweb.bookstore.common.service.EmailService emailService;
+    private final com.cdweb.bookstore.modules.user.repository.PasswordResetOtpRepository passwordResetOtpRepository;
 
     @Transactional
     public LoginResponse login(LoginRequest request, HttpServletResponse response) {
@@ -118,5 +120,45 @@ public class AuthService {
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new com.cdweb.bookstore.common.exception.ResourceNotFoundException("Email này chưa được đăng ký trong hệ thống.");
+        }
+
+        String otpCode = String.format("%06d", new java.util.Random().nextInt(999999));
+        java.time.Instant expiryDate = java.time.Instant.now().plus(5, java.time.temporal.ChronoUnit.MINUTES);
+
+        com.cdweb.bookstore.modules.user.model.PasswordResetOtp resetOtp = com.cdweb.bookstore.modules.user.model.PasswordResetOtp.builder()
+                .email(email)
+                .otpCode(otpCode)
+                .expiryDate(expiryDate)
+                .used(false)
+                .build();
+
+        passwordResetOtpRepository.save(resetOtp);
+        emailService.sendOtpEmail(email, otpCode);
+    }
+
+    @Transactional
+    public void resetPassword(com.cdweb.bookstore.modules.auth.dto.ResetPasswordRequest request) {
+        com.cdweb.bookstore.modules.user.model.PasswordResetOtp resetOtp = passwordResetOtpRepository
+                .findFirstByEmailAndOtpCodeAndUsedFalseOrderByCreatedAtDesc(request.email(), request.otpCode())
+                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ hoặc đã được sử dụng."));
+
+        if (resetOtp.isExpired()) {
+            throw new RuntimeException("Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new com.cdweb.bookstore.common.exception.ResourceNotFoundException("Không tìm thấy người dùng có email: " + request.email()));
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        resetOtp.setUsed(true);
+        passwordResetOtpRepository.save(resetOtp);
     }
 }
