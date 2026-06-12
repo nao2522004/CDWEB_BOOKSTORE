@@ -236,7 +236,7 @@ export default function AdminBooks() {
         }
       />
 
-      {/* Thanh công cụ / Tìm kiếm */}
+      {}
       <div className="flex gap-3 mb-6 bg-white p-3 rounded-lg border border-stone-200/60 shadow-xs">
         <div className="w-full max-w-md">
           <AdminSearch
@@ -247,7 +247,7 @@ export default function AdminBooks() {
         </div>
       </div>
 
-      {/* Bảng Dữ Liệu */}
+      {}
       <div className="bg-white rounded-lg border border-stone-200/60 shadow-xs overflow-hidden">
         <AdminTable columns={columns} data={books?.content} loading={loading} emptyMsg="Chưa có dữ liệu thư tịch" />
       </div>
@@ -256,7 +256,7 @@ export default function AdminBooks() {
         <AdminPagination data={books} page={page} onPageChange={setPage} />
       </div>
 
-      {/* Form Modal */}
+      {}
       <AdminModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -265,7 +265,7 @@ export default function AdminBooks() {
       >
         <form onSubmit={handleSubmit} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar py-2">
 
-          {/* Nhóm Thông tin chính */}
+          {}
           <div className="bg-[#FAF8F5] p-4 rounded-lg border border-[#D4C4A8]/40 space-y-4">
             <h4 className="text-xs font-bold tracking-widest text-[#8B6508] uppercase border-b border-[#D4C4A8]/30 pb-1.5 font-serif">Thông tin cơ bản</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -298,7 +298,7 @@ export default function AdminBooks() {
             </div>
           </div>
 
-          {/* Nhóm Thuộc tính sách */}
+          {}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-lg border border-stone-200 space-y-4">
               <h4 className="text-xs font-bold tracking-widest text-stone-500 uppercase border-b border-stone-100 pb-1.5">Định danh & Ngôn ngữ</h4>
@@ -349,7 +349,7 @@ export default function AdminBooks() {
             </div>
           </div>
 
-          {/* Nhóm Phân loại & Tác giả */}
+          {}
           <div className="bg-white p-4 rounded-lg border border-stone-200 space-y-4">
             <h4 className="text-xs font-bold tracking-widest text-stone-500 uppercase border-b border-stone-100 pb-1.5">Phân loại & Tác quyền</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -405,7 +405,7 @@ export default function AdminBooks() {
             />
           </FormField>
 
-          {/* Nút hành động */}
+          {}
           <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
             <AdminBtn variant="secondary" className="hover:bg-stone-100" onClick={() => setModalOpen(false)}>Hủy Bỏ</AdminBtn>
             <AdminBtn type="submit" disabled={submitting} className="px-6">

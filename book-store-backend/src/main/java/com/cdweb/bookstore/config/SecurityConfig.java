@@ -24,20 +24,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-/**
- * SecurityConfig — HTTP security, CORS, OAuth2 login.
- *
- * JWT beans (JwtEncoder/JwtDecoder/JwtAuthenticationConverter) đã được tách
- * sang JwtConfig để tránh circular dependency:
- *   SecurityConfig → GoogleOAuth2SuccessHandler → JwtService → JwtEncoder
- *   → (trước đây định nghĩa trong SecurityConfig) → CYCLE
- *
- * Giờ JwtConfig độc lập, SecurityConfig nhận JwtDecoder/JwtAuthenticationConverter
- * qua method injection trong securityFilterChain().
- *
- * @Lazy trên GoogleOAuth2SuccessHandler để Spring khởi tạo nó sau,
- * tránh trường hợp vẫn còn phụ thuộc vòng (dự phòng).
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -46,11 +32,8 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
 
-    /**
-     * @Lazy: khởi tạo GoogleOAuth2SuccessHandler sau khi tất cả các bean khác
-     * đã sẵn sàng, đảm bảo JwtService (phụ thuộc JwtEncoder từ JwtConfig)
-     * được inject đúng thứ tự.
-     */
+    
+
     @Lazy
     private final GoogleOAuth2SuccessHandler googleOAuth2SuccessHandler;
 
@@ -68,10 +51,8 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * JwtDecoder và JwtAuthenticationConverter được inject qua parameter
-     * (không phải field) để Spring giải quyết sau khi JwtConfig đã khởi tạo.
-     */
+    
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -81,14 +62,14 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
-            // OAuth2 flow cần session tạm thời trong suốt redirect — IF_REQUIRED
-            // API calls vẫn stateless vì dùng JWT Bearer token
+            
+            
             .sessionManagement(s -> s
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .authorizeHttpRequests(auth -> auth
 
-                // ── PUBLIC ──────────────────────────────────────────────────
+                
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/books/**", "/categories/**",
@@ -96,14 +77,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/books/**", "/categories/**",
                         "/authors/**", "/publishers/**").permitAll()
 
-                // ZaloPay callback — ZaloPay server gọi trực tiếp, không có JWT
-                // Bảo mật qua xác thực MAC chữ ký trong ZaloPayPaymentService
+                
+                
                 .requestMatchers(HttpMethod.POST, "/payment/zalopay/callback").permitAll()
 
-                // ── ADMIN ────────────────────────────────────────────────────
+                
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                // ── USER (đã đăng nhập) ───────────────────────────────────────
+                
                 .requestMatchers("/cart/**").authenticated()
                 .requestMatchers("/orders/**").authenticated()
                 .requestMatchers("/coupons/preview").authenticated()
@@ -112,14 +93,14 @@ public class SecurityConfig {
 
                 .anyRequest().authenticated()
             )
-            // ── JWT Resource Server (cho API calls) ──────────────────────────
+            
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt
                     .decoder(jwtDecoder)
                     .jwtAuthenticationConverter(jwtAuthenticationConverter)
                 )
             )
-            // ── Google OAuth2 Login ───────────────────────────────────────────
+            
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
@@ -141,7 +122,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** RestTemplate dùng cho ZaloPay API calls */
+    
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

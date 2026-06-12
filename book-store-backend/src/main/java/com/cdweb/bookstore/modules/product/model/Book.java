@@ -59,13 +59,13 @@ public class Book {
     private Instant publishedDate;
 
     @Enumerated(EnumType.STRING)
-    private Status status;   // ACTIVE, INACTIVE, OUT_OF_STOCK
+    private Status status;   
     @Column(name = "is_deleted")
     private Boolean isDeleted;
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    // --- relationships ---
+    
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "book_authors", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
@@ -86,16 +86,14 @@ public class Book {
         this.createdAt = Instant.now();
     }
 
-    /**
-     * Trả về ảnh bìa (is_cover = true), fallback ảnh đầu tiên
-     */
+    
+
     public String getCoverUrl() {
         return images.stream().filter(BookImage::isCover).map(BookImage::getImageUrl).findFirst().orElse(images.isEmpty() ? null : images.get(0).getImageUrl());
     }
 
-    /**
-     * Giá hiển thị: ưu tiên discount_price
-     */
+    
+
     public BigDecimal getEffectivePrice() {
         return discountPrice != null ? discountPrice : price;
     }

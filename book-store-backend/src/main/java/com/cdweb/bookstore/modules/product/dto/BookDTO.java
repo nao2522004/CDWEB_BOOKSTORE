@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookDTO {
-    // ── Request & Response ───────────────────────────────────────────────────
+    
     private Long id;
     private String title;
     private String slug;

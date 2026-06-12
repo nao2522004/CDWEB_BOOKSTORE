@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-// ─── Order ────────────────────────────────────────────────────────────────────
 @Entity
 @Table(name = "orders")
 @Getter
@@ -59,7 +58,7 @@ public class Order {
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
 
-    // Snapshot địa chỉ giao hàng tại thời điểm đặt
+    
     @Column(name = "recipient_name")
     private String recipientName;
 

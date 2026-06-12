@@ -25,7 +25,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final BookRepository  bookRepository;
 
-    // ─── User: xem đơn hàng của mình ─────────────────────────────────────────
+    
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUser(Long userId) {
@@ -42,7 +42,7 @@ public class OrderService {
         return OrderResponse.fromOrder(order);
     }
 
-    // ─── User: tự hủy đơn ────────────────────────────────────────────────────
+    
 
     @Transactional
     public OrderResponse cancelOrder(Long orderId, Long userId) {
@@ -61,13 +61,10 @@ public class OrderService {
         return OrderResponse.fromOrder(orderRepository.save(order));
     }
 
-    // ─── Admin: cập nhật trạng thái đơn hàng ─────────────────────────────────
+    
 
-    /**
-     * State machine:
-     * PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED
-     *                                            ↘ CANCELLED / RETURNED
-     */
+    
+
     @Transactional
     public OrderResponse updateStatus(Long orderId, Order.OrderStatus newStatus) {
         Order order = loadWithItems(orderId);
@@ -75,7 +72,7 @@ public class OrderService {
 
         order.setStatus(newStatus);
 
-        // Hoàn tồn kho nếu đơn bị hủy hoặc trả hàng
+        
         if (newStatus == Order.OrderStatus.CANCELLED ||
             newStatus == Order.OrderStatus.RETURNED) {
             restoreStock(order.getItems());
@@ -84,14 +81,10 @@ public class OrderService {
         return OrderResponse.fromOrder(orderRepository.save(order));
     }
 
-    // ─── Admin: cập nhật trạng thái thanh toán ────────────────────────────────
+    
 
-    /**
-     * Luồng hợp lệ:
-     *   UNPAID → PAID      (xác nhận đã nhận tiền)
-     *   PAID   → REFUNDED  (hoàn tiền khi hủy/trả hàng)
-     * UNPAID → REFUNDED không hợp lệ (chưa thu tiền thì không có gì để hoàn).
-     */
+    
+
     @Transactional
     public OrderResponse updatePaymentStatus(Long orderId, Order.PaymentStatus newPaymentStatus) {
         Order order = loadWithItems(orderId);
@@ -102,7 +95,7 @@ public class OrderService {
         return OrderResponse.fromOrder(orderRepository.save(order));
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
+    
 
     private Order loadWithItems(Long orderId) {
         return orderRepository.findByIdWithItems(orderId)
@@ -111,7 +104,7 @@ public class OrderService {
     }
 
     private void assertOrderBelongsToUser(Order order, Long userId) {
-        // Trả 404 thay vì 403 để không lộ thông tin đơn hàng tồn tại
+        
         if (!order.getUser().getId().equals(userId)) {
             throw new ResourceNotFoundException(
                     "Đơn hàng #" + order.getId() + " không tồn tại");
@@ -130,7 +123,7 @@ public class OrderService {
             case CONFIRMED  -> next == Order.OrderStatus.PROCESSING || next == Order.OrderStatus.CANCELLED;
             case PROCESSING -> next == Order.OrderStatus.SHIPPED    || next == Order.OrderStatus.CANCELLED;
             case SHIPPED    -> next == Order.OrderStatus.DELIVERED  || next == Order.OrderStatus.RETURNED;
-            default         -> false; // DELIVERED, CANCELLED, RETURNED: trạng thái cuối
+            default         -> false; 
         };
 
         if (!valid) {
@@ -143,7 +136,7 @@ public class OrderService {
         boolean valid = switch (current) {
             case UNPAID   -> next == Order.PaymentStatus.PAID;
             case PAID     -> next == Order.PaymentStatus.REFUNDED;
-            case REFUNDED -> false; // trạng thái cuối
+            case REFUNDED -> false; 
         };
 
         if (!valid) {

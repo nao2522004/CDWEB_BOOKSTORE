@@ -20,14 +20,8 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final CouponUsageRepository couponUsageRepository;
 
-    /**
-     * Validate mã giảm giá và trả về kết quả để hiển thị cho user.
-     * Không thực hiện bất kỳ thay đổi DB nào — chỉ đọc và tính toán.
-     *
-     * @param code        mã giảm giá
-     * @param orderAmount tổng tiền hàng (chưa gồm ship)
-     * @param user        user đang đăng nhập
-     */
+    
+
     @Transactional(readOnly = true)
     public CouponValidationResponse previewCoupon(String code, BigDecimal orderAmount, User user) {
         Coupon coupon = couponRepository.findByCode(code).orElse(null);
@@ -45,13 +39,8 @@ public class CouponService {
         return CouponValidationResponse.valid(code, coupon.getType().name(), discount);
     }
 
-    /**
-     * Kiểm tra tính hợp lệ của coupon ở thời điểm checkout.
-     * Coupon phải được load bằng findByCodeForUpdate (đã lock) trước khi gọi hàm
-     * này.
-     *
-     * @throws RuntimeException nếu coupon không hợp lệ
-     */
+    
+
     public void assertCouponValid(Coupon coupon, User user, BigDecimal orderAmount) {
         String reason = findInvalidReason(coupon, user, orderAmount);
         if (reason != null) {
@@ -59,12 +48,8 @@ public class CouponService {
         }
     }
 
-    /**
-     * Ghi nhận việc sử dụng coupon sau khi đơn hàng được lưu.
-     * Tăng usedCount và tạo bản ghi CouponUsage.
-     * <p>
-     * Phải được gọi trong cùng @Transactional với checkout để rollback đồng bộ.
-     */
+    
+
     public void recordUsage(Coupon coupon, User user, Order order) {
         coupon.setUsedCount(coupon.getUsedCount() + 1);
         couponRepository.save(coupon);
@@ -73,9 +58,8 @@ public class CouponService {
         couponUsageRepository.save(usage);
     }
 
-    /**
-     * Trả về lý do không hợp lệ, hoặc null nếu coupon hợp lệ.
-     */
+    
+
     private String findInvalidReason(Coupon coupon, User user, BigDecimal orderAmount) {
         if (!coupon.isValid(orderAmount)) {
             if (coupon.getStatus() != Coupon.CouponStatus.ACTIVE) {
@@ -94,6 +78,6 @@ public class CouponService {
             return "Bạn đã sử dụng mã giảm giá này rồi";
         }
 
-        return null; // hợp lệ
+        return null; 
     }
 }

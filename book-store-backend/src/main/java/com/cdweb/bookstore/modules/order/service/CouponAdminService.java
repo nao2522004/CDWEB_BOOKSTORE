@@ -57,7 +57,7 @@ public class CouponAdminService {
     public CouponResponse updateCoupon(Long id, CouponRequest request) {
         Coupon coupon = loadCoupon(id);
 
-        // Kiểm tra trùng code với coupon KHÁC
+        
         String newCode = request.code().toUpperCase();
         if (!newCode.equals(coupon.getCode())) {
             couponRepository.findByCode(newCode).ifPresent(existing -> {

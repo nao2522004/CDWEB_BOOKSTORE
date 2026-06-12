@@ -61,7 +61,7 @@ public class CategoryService {
                 .toList();
     }
 
-    // R - READ BY ID
+    
     public CategoryDTO getCategoryById(Long id) {
         return toDTO(categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + id)));
@@ -99,7 +99,7 @@ public class CategoryService {
         return toDTO(categoryRepository.save(category));
     }
 
-    // D - DELETE
+    
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)

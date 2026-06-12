@@ -25,6 +25,6 @@ public record AddressRequest(
         @NotBlank(message = "Tỉnh/Thành phố không được để trống")
         String province,
 
-        // true = đặt làm địa chỉ mặc định
+        
         boolean isDefault
 ) {}

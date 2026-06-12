@@ -2,12 +2,6 @@ const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 
-/**
- * Upload ảnh lên Cloudinary (Unsigned Upload).
- * @param {File} file - File ảnh người dùng chọn
- * @param {function} onProgress - Callback nhận % tiến trình (0-100)
- * @returns {Promise<string>} - secure_url của ảnh trên Cloudinary
- */
 export async function uploadToCloudinary(file, onProgress) {
   const formData = new FormData();
   formData.append("file", file);

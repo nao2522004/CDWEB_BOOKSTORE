@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @Setter
 public class JwtProperties {
     private String base64Secret;
-    private long accessTokenExpiration;   // ms
-    private long refreshTokenExpiration;  // ms
+    private long accessTokenExpiration;   
+    private long refreshTokenExpiration;  
 }

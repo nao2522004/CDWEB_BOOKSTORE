@@ -43,7 +43,7 @@ export function CartProvider({ children }) {
   }, []);
 
   const totalItems = cart?.items?.reduce((s, i) => s + i.quantity, 0) || 0;
-  // B2: Backend trả unitPrice (không phải price)
+  
   const totalPrice = cart?.items?.reduce((s, i) => s + i.unitPrice * i.quantity, 0) || 0;
 
   return (

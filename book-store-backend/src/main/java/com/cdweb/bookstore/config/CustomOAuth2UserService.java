@@ -17,15 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Xử lý thông tin user sau khi Google xác thực thành công.
- *
- * Luồng: Google callback → Spring Security → CustomOAuth2UserService
- * → Tìm user theo email
- * → Nếu chưa có: tạo mới với provider=GOOGLE
- * → Nếu đã có LOCAL: liên kết (link) account
- * → Trả về OAuth2User để Spring Security tiếp tục xử lý
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +33,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
         String avatarUrl = (String) attributes.get("picture");
-        String providerId = (String) attributes.get("sub"); // Google unique ID
+        String providerId = (String) attributes.get("sub"); 
 
         log.info("Google OAuth2 login: email={}", email);
 
@@ -50,7 +41,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .map(existing -> updateGoogleInfo(existing, providerId, avatarUrl))
                 .orElseGet(() -> createGoogleUser(email, name, avatarUrl, providerId));
 
-        // Trả về OAuth2User với email làm nameAttributeKey
+        
         Map<String, Object> enrichedAttributes = new java.util.HashMap<>(attributes);
         enrichedAttributes.put("userId", user.getId());
         enrichedAttributes.put("localEmail", email);
@@ -58,13 +49,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new DefaultOAuth2User(
                 List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")),
                 enrichedAttributes,
-                "email" // nameAttributeKey
+                "email" 
         );
     }
 
-    /**
-     * Tạo user mới từ tài khoản Google.
-     */
+    
+
     private User createGoogleUser(String email, String name, String avatarUrl, String providerId) {
         log.info("Tạo user mới từ Google: {}", email);
         User user = User.builder()
@@ -78,15 +68,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return userRepository.save(user);
     }
 
-    /**
-     * Cập nhật thông tin Google cho user đã tồn tại (link account).
-     * Nếu user đăng ký LOCAL trước rồi dùng Google login cùng email → link tự động.
-     */
+    
+
     private User updateGoogleInfo(User existing, String providerId, String avatarUrl) {
         if (existing.getProvider() == User.Provider.LOCAL) {
             log.info("Link Google account cho user LOCAL: {}", existing.getEmail());
         }
-        // Cập nhật providerId và avatar nếu chưa có
+        
         if (existing.getProviderId() == null) {
             existing.setProviderId(providerId);
         }

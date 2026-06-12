@@ -14,14 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-/**
- * Endpoints liên quan đến thanh toán ZaloPay.
- *
- * POST /payment/zalopay/init/{orderId} → User khởi tạo thanh toán, nhận
- * orderUrl
- * POST /payment/zalopay/callback → ZaloPay gọi sau khi user thanh toán (PUBLIC)
- * GET /payment/zalopay/status/{orderId} → User kiểm tra kết quả thanh toán
- */
 @RestController
 @RequestMapping("/payment/zalopay")
 @RequiredArgsConstructor
@@ -31,12 +23,8 @@ public class ZaloPayController {
 
     private final ZaloPayPaymentService paymentService;
 
-    /**
-     * POST /payment/zalopay/init/{orderId}
-     *
-     * User gọi sau khi đặt hàng với paymentMethod=ZALOPAY.
-     * Server trả về orderUrl → frontend redirect user đến trang ZaloPay.
-     */
+    
+
     @PostMapping("/init/{orderId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ZaloPayInitResponse>> initPayment(
@@ -47,16 +35,8 @@ public class ZaloPayController {
         return ApiResponse.ok(response, "Khởi tạo thanh toán ZaloPay thành công");
     }
 
-    /**
-     * POST /payment/zalopay/callback
-     *
-     * ZaloPay server gọi endpoint này khi user hoàn tất thanh toán.
-     * Endpoint này KHÔNG cần xác thực JWT — ZaloPay gọi trực tiếp từ server của họ.
-     * Bảo mật thực hiện qua xác thực MAC chữ ký.
-     *
-     * Bắt buộc trả về {"return_code": 1} nếu xử lý thành công,
-     * ZaloPay sẽ retry nếu nhận được mã khác.
-     */
+    
+
     @PostMapping("/callback")
     public ResponseEntity<Map<String, Object>> handleCallback(
             @RequestBody Map<String, Object> body) {
@@ -74,19 +54,15 @@ public class ZaloPayController {
                     "return_code",    1,
                     "return_message", "success"));
         } else {
-            // Trả lỗi → ZaloPay sẽ retry callback tối đa 3 lần
+            
             return ResponseEntity.ok(Map.of(
                     "return_code",    0,
                     "return_message", "Xử lý callback thất bại"));
         }
     }
 
-    /**
-     * GET /payment/zalopay/status/{orderId}
-     *
-     * User chủ động kiểm tra trạng thái giao dịch.
-     * Hữu ích khi callback chưa về (mạng chậm, ngrok timeout...).
-     */
+    
+
     @GetMapping("/status/{orderId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ZaloPayTransaction>> queryStatus(

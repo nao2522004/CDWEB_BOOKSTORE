@@ -22,7 +22,7 @@ export function useAsync(asyncFn, deps = []) {
       }
       throw err;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, deps);
 
   useEffect(() => {

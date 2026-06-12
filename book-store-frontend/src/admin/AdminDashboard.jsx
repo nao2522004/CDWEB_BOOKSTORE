@@ -96,7 +96,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-2xl shadow-xs border border-stone-200/60 my-4 space-y-6">
-      {/* Khối Tiêu Đề */}
+      {}
       <div className="border-b border-[#D4C4A8]/40 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1
@@ -115,17 +115,17 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Grid Chỉ Số */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard icon="📜" label="Quy mô Đơn Hàng" value={stats.orders} sub="Toàn bộ lịch sử giao dịch" to="/admin/orders" color="#8B6508" />
         <StatCard icon="📚" label="Sản lượng đầu sách" value={stats.books} sub="Tổng mục lưu kho thư viện" to="/admin/books" color="#4A7C59" />
         <StatCard icon="🎟️" label="Chiến dịch Coupon" value={stats.coupons} sub="Mã giảm giá đang kích hoạt" to="/admin/coupons" color="#92400E" />
       </div>
 
-      {/* Grid Nội Dung Thân */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Khối Trái: Đơn Hàng Mới Nhất */}
+        {}
         <div className="lg:col-span-2 bg-white border border-stone-200/80 rounded-xl overflow-hidden relative shadow-2xs">
           <div className="absolute inset-1 border border-stone-50 rounded-lg pointer-events-none" />
 
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Khối Phải: Thao Tác Nhanh */}
+        {}
         <div className="space-y-3">
           <h2
             className="text-xs uppercase tracking-wider font-bold text-[#8B6508] px-1 flex items-center gap-1.5"

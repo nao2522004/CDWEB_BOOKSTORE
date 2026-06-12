@@ -1,8 +1,5 @@
 import { useState } from 'react';
 
-/* 
-   ADMIN PAGE HEADER
-    */
 export function AdminPageHeader({ title, subtitle, action }) {
   return (
     <div className="flex items-start justify-between mb-6 pb-5 border-b border-[#D4C4A8]/40">
@@ -22,9 +19,6 @@ export function AdminPageHeader({ title, subtitle, action }) {
   );
 }
 
-/* 
-    ADMIN BUTTON 
-    */
 export function AdminBtn({ onClick, children, variant = 'primary', size = 'md', disabled, type = 'button', className = '' }) {
   const base = 'inline-flex items-center justify-center font-bold uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-[#8B6508] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg shadow-sm';
 
@@ -54,9 +48,6 @@ export function AdminBtn({ onClick, children, variant = 'primary', size = 'md', 
   );
 }
 
-/* 
-   ADMIN SEARCHBAR 
-    */
 export function AdminSearch({ value, onChange, placeholder = 'Tìm kiếm...', className = '' }) {
   return (
     <div className="relative flex-1 max-w-sm">
@@ -74,9 +65,6 @@ export function AdminSearch({ value, onChange, placeholder = 'Tìm kiếm...', c
   );
 }
 
-/* 
-    ADMIN TABLE 
-    */
 export function AdminTable({ columns, data, loading, emptyMsg = 'Không có dữ liệu' }) {
   if (loading) {
     return (
@@ -126,9 +114,6 @@ export function AdminTable({ columns, data, loading, emptyMsg = 'Không có dữ
   );
 }
 
-/* 
-    ADMIN MODAL 
-    */
 export function AdminModal({ open, onClose, title, children, width = 'max-w-xl' }) {
   if (!open) return null;
   return (
@@ -155,9 +140,6 @@ export function AdminModal({ open, onClose, title, children, width = 'max-w-xl' 
   );
 }
 
-/* 
-    FORM COMPONENTS (Field, Input, Textarea, Select)
-    */
 export function FormField({ label, error, required, children, hint }) {
   return (
     <div className="space-y-1.5">
@@ -219,9 +201,6 @@ export function AdminSelect({ value, onChange, options, placeholder, disabled, c
   );
 }
 
-/* 
-   STATUS BADGE 
-    */
 export function StatusBadge({ status, map }) {
   const config = map[status] || { label: status, colorClass: 'bg-stone-100 text-stone-700 border-stone-200' };
 
@@ -232,9 +211,6 @@ export function StatusBadge({ status, map }) {
   );
 }
 
-/* 
-   USE CONFIRM 
-    */
 export function useConfirm() {
   const [state, setState] = useState({ open: false, message: '', onConfirm: null });
 
@@ -281,9 +257,6 @@ export function useConfirm() {
   return { confirm, Dialog };
 }
 
-/* 
-  ADMIN PAGINATION 
-    */
 export function AdminPagination({ data, page, onPageChange }) {
   if (!data || data.totalPages <= 1) return null;
   const { totalPages, hasNext, hasPrevious } = data;
@@ -325,9 +298,6 @@ export function AdminPagination({ data, page, onPageChange }) {
   );
 }
 
-/* 
-   ADMIN TOAST 
-    */
 export function useAdminToast() {
   const [toasts, setToasts] = useState([]);
   const add = (message, type = 'success') => {

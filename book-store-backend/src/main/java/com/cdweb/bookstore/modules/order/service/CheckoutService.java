@@ -83,8 +83,8 @@ public class CheckoutService {
                 .note(request.note())
                 .build();
 
-        // ── Tạo OrderItems với snapshot dữ liệu tại thời điểm đặt ─────────
-        // Snapshot title/ảnh phòng trường hợp admin đổi thông tin sách sau này
+        
+        
         List<OrderItem> orderItems = buildOrderItems(cart.getItems(), order);
         order.getItems().addAll(orderItems);
 
@@ -102,12 +102,8 @@ public class CheckoutService {
         return OrderResponse.fromOrder(savedOrder);
     }
 
-    /**
-     * Kiểm tra từng sản phẩm trong giỏ:
-     * - Sách phải đang ACTIVE
-     * - Tồn kho phải đủ
-     * Đồng thời tính subtotal để tránh loop thêm lần nữa.
-     */
+    
+
     private BigDecimal validateStockAndCalcSubtotal(List<CartItem> items) {
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -135,20 +131,16 @@ public class CheckoutService {
         return subtotal;
     }
 
-    /**
-     * Miễn phí ship nếu subtotal >= ngưỡng, ngược lại tính phí cố định.
-     */
+    
+
     private BigDecimal calcShippingFee(BigDecimal subtotal) {
         return subtotal.compareTo(FREE_SHIPPING_THRESHOLD) >= 0
                 ? BigDecimal.ZERO
                 : SHIPPING_FEE;
     }
 
-    /**
-     * Build snapshot địa chỉ thành 1 chuỗi text.
-     * Lưu dạng text để đơn hàng không bị ảnh hưởng khi user sau này chỉnh sửa địa
-     * chỉ.
-     */
+    
+
     private String buildAddressSnapshot(Address address) {
         List<String> parts = new ArrayList<>();
         if (address.getStreet() != null)
@@ -162,13 +154,12 @@ public class CheckoutService {
         return String.join(", ", parts);
     }
 
-    /**
-     * Chuyển CartItem → OrderItem với snapshot title và ảnh bìa.
-     */
+    
+
     private List<OrderItem> buildOrderItems(List<CartItem> cartItems, Order order) {
         return cartItems.stream().map(item -> {
             Book book = item.getBook();
-            // Dùng unitPrice snapshot từ giỏ hàng, không gọi lại getEffectivePrice()
+            
             BigDecimal unitPrice = item.getUnitPrice() != null
                     ? item.getUnitPrice()
                     : book.getEffectivePrice();
@@ -183,12 +174,8 @@ public class CheckoutService {
         }).toList();
     }
 
-    /**
-     * Trừ tồn kho bằng atomic UPDATE.
-     * Nếu trả về 0 dòng bị ảnh hưởng → tồn kho đã thay đổi giữa bước validate và
-     * bước này
-     * (race condition) → ném exception để rollback toàn bộ transaction.
-     */
+    
+
     private void decreaseStockOrThrow(List<CartItem> items) {
         for (CartItem item : items) {
             int rowsAffected = bookRepository.decreaseStock(item.getBook().getId(), item.getQuantity());

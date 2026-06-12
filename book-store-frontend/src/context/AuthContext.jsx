@@ -13,8 +13,8 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  // Đăng ký callback: khi api/index.js phát hiện refresh thất bại
-  // → tự động logout UI mà không cần user làm gì
+  
+  
   useEffect(() => {
     setAuthFailureHandler(() => {
       localStorage.removeItem('accessToken');

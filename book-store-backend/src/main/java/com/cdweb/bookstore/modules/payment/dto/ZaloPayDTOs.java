@@ -3,14 +3,9 @@ package com.cdweb.bookstore.modules.payment.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-//  Request / Response DTOs cho ZaloPay API 
-
-/**
- * Response từ ZaloPay khi tạo đơn hàng (/v2/create).
- */
 @Data
 class ZaloPayCreateResponse {
-    /** 1 = thành công, các mã khác = lỗi */
+    
     @JsonProperty("return_code")
     private int returnCode;
 
@@ -23,22 +18,19 @@ class ZaloPayCreateResponse {
     @JsonProperty("sub_return_message")
     private String subReturnMessage;
 
-    /** URL thanh toán ZaloPay — chuyển hướng user đến đây */
+    
     @JsonProperty("order_url")
     private String orderUrl;
 
-    /** Token định danh đơn hàng phía ZaloPay */
+    
     @JsonProperty("zp_trans_token")
     private String zpTransToken;
 
-    /** URL thanh toán qua app ZaloPay */
+    
     @JsonProperty("order_token")
     private String orderToken;
 }
 
-/**
- * Response từ ZaloPay khi query trạng thái đơn (/v2/query).
- */
 @Data
 class ZaloPayQueryResponse {
     @JsonProperty("return_code")
@@ -53,7 +45,7 @@ class ZaloPayQueryResponse {
     @JsonProperty("sub_return_message")
     private String subReturnMessage;
 
-    /** 1 = đã thanh toán, 2 = đang xử lý, -49 = chưa thanh toán */
+    
     @JsonProperty("is_processing")
     private boolean isProcessing;
 
@@ -67,10 +59,6 @@ class ZaloPayQueryResponse {
     private long zpTransId;
 }
 
-/**
- * Payload từ ZaloPay Callback gửi về server sau khi user thanh toán thành công.
- * ZaloPay POST body: data + mac
- */
 @Data
 class ZaloPayCallbackPayload {
     private String data;
@@ -78,9 +66,6 @@ class ZaloPayCallbackPayload {
     private int type;
 }
 
-/**
- * Nội dung bên trong field "data" của Callback (sau khi parse JSON).
- */
 @Data
 class ZaloPayCallbackData {
     @JsonProperty("app_id")
@@ -123,10 +108,6 @@ class ZaloPayCallbackData {
     private long discountAmount;
 }
 
-/**
- * Response trả về cho ZaloPay sau khi xử lý callback.
- * ZaloPay yêu cầu return_code = 1 nếu server đã xử lý thành công.
- */
 @Data
 class ZaloPayCallbackResponse {
     @JsonProperty("return_code")

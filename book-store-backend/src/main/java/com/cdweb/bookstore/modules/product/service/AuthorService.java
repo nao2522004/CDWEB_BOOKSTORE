@@ -72,10 +72,8 @@ public class AuthorService {
 
         authorRepository.delete(author);
     }
-    /**
-     * Hàm helper để map dữ liệu từ DTO sang Object hiện có
-     * Chỉ cập nhật những trường không null
-     */
+    
+
     private void setDtoToEntity(AuthorDTO dto, Author author) {
         if (dto.getName() != null)     author.setName(dto.getName());
         if (dto.getBio() != null)      author.setBio(dto.getBio());

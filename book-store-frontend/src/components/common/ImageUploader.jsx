@@ -1,12 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { uploadToCloudinary } from "../../utils/cloudinary";
 
-/**
- * Props:
- *   value      {string}   - URL hiện tại (nếu đang sửa sách)
- *   onChange   {function} - Callback khi upload xong hoặc khi xóa ảnh, nhận secure_url hoặc rỗng
- *   disabled   {boolean}
- */
 export default function ImageUploader({ value, onChange, disabled }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -22,8 +16,8 @@ export default function ImageUploader({ value, onChange, disabled }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate phía client
-    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    
+    const MAX_SIZE = 5 * 1024 * 1024; 
     const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
     if (!ALLOWED.includes(file.type)) {
       setError("Chỉ chấp nhận JPG, PNG, WEBP");
@@ -34,7 +28,7 @@ export default function ImageUploader({ value, onChange, disabled }) {
       return;
     }
 
-    // Preview tức thì trước khi upload
+    
     const localUrl = URL.createObjectURL(file);
     setPreview(localUrl);
     setError("");
@@ -44,28 +38,28 @@ export default function ImageUploader({ value, onChange, disabled }) {
     try {
       const cloudUrl = await uploadToCloudinary(file, setProgress);
       setPreview(cloudUrl);
-      onChange(cloudUrl); // Trả URL thật về form cha
+      onChange(cloudUrl); 
     } catch (err) {
       setError(err.message);
-      setPreview(value || ""); // Rollback về ảnh cũ nếu lỗi
+      setPreview(value || ""); 
     } finally {
       setUploading(false);
       setProgress(0);
-      // Reset input để có thể chọn lại cùng file
+      
       if (inputRef.current) inputRef.current.value = "";
     }
   };
 
   const handleClear = (e) => {
-    e.stopPropagation(); // Ngăn sự kiện click kích hoạt input file
+    e.stopPropagation(); 
     if (disabled || uploading) return;
     setPreview("");
-    onChange(""); // Truyền chuỗi rỗng về form cha để xóa ảnh bìa
+    onChange(""); 
   };
 
   return (
     <div className="space-y-2">
-      {/* Vùng preview + click để chọn ảnh */}
+      {}
       <div
         onClick={() => !disabled && !uploading && inputRef.current?.click()}
         className={`relative border-2 border-dashed rounded-lg overflow-hidden cursor-pointer transition-colors group
@@ -81,7 +75,7 @@ export default function ImageUploader({ value, onChange, disabled }) {
               alt="Book cover preview"
               className="w-full h-full object-cover"
             />
-            {/* Nút xóa ảnh */}
+            {}
             {!disabled && !uploading && (
               <button
                 type="button"
@@ -102,7 +96,7 @@ export default function ImageUploader({ value, onChange, disabled }) {
           </div>
         )}
 
-        {/* Overlay khi đang upload */}
+        {}
         {uploading && (
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
             <p className="text-white text-xs font-bold mb-2">{progress}%</p>
@@ -115,7 +109,7 @@ export default function ImageUploader({ value, onChange, disabled }) {
           </div>
         )}
 
-        {/* Badge thay đổi ảnh khi đã có preview */}
+        {}
         {preview && !uploading && (
           <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors flex items-center justify-center">
             <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-bold bg-black/50 px-2 py-1 rounded transition-opacity duration-200">
@@ -138,7 +132,7 @@ export default function ImageUploader({ value, onChange, disabled }) {
         <p className="text-red-600 text-xs font-serif italic">{error}</p>
       )}
 
-      {/* Hiển thị URL đã upload */}
+      {}
       {value && !uploading && (
         <p className="text-[10px] text-stone-400 font-mono break-all line-clamp-1" title={value}>
           ✓ {value.split("/").pop()}

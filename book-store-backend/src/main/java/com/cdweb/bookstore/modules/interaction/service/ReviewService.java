@@ -22,10 +22,8 @@ public class ReviewService {
     private final BookRepository   bookRepository;
     private final UserRepository   userRepository;
 
-    /**
-     * GET /reviews/book/{bookId}?page=1&size=10
-     * Lấy danh sách đánh giá của một cuốn sách, phân trang.
-     */
+    
+
     @Transactional(readOnly = true)
     public Page<ReviewDTO> getByBook(Long bookId, int page, int size) {
         int pageIndex = Math.max(0, page - 1);
@@ -34,10 +32,8 @@ public class ReviewService {
                 .map(ReviewDTO::from);
     }
 
-    /**
-     * POST /reviews
-     * Tạo mới đánh giá. Mỗi user chỉ được review một cuốn sách một lần.
-     */
+    
+
     @Transactional
     public ReviewDTO create(Long userId, ReviewDTO dto) {
         if (reviewRepository.existsByUserIdAndBookId(userId, dto.getBookId())) {
@@ -59,10 +55,8 @@ public class ReviewService {
         return ReviewDTO.from(reviewRepository.save(review));
     }
 
-    /**
-     * PUT /reviews/{id}
-     * Cập nhật nội dung đánh giá (chỉ chủ sở hữu mới được sửa).
-     */
+    
+
     @Transactional
     public ReviewDTO update(Long userId, Long reviewId, ReviewDTO dto) {
         Review review = reviewRepository.findByIdAndUserId(reviewId, userId)
@@ -75,10 +69,8 @@ public class ReviewService {
         return ReviewDTO.from(reviewRepository.save(review));
     }
 
-    /**
-     * DELETE /reviews/{id}
-     * Xóa đánh giá (chỉ chủ sở hữu mới được xóa).
-     */
+    
+
     @Transactional
     public void delete(Long userId, Long reviewId) {
         Review review = reviewRepository.findByIdAndUserId(reviewId, userId)

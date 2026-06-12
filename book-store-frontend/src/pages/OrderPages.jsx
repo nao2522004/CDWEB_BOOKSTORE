@@ -139,8 +139,8 @@ export function OrderDetailPage() {
     </div>
   );
 
-  // BUG FIX: paymentStatus enum là UNPAID/PAID/REFUNDED — không có PENDING.
-  // Điều kiện hiển thị banner ZaloPay chờ thanh toán phải check UNPAID.
+  
+  
   const pendingZaloPay = location.state?.pendingPayment && location.state?.zalopay;
   const showZaloPayBanner = (pendingZaloPay || (
     order?.paymentMethod === 'ZALOPAY' && order?.paymentStatus === 'UNPAID'
@@ -157,7 +157,7 @@ export function OrderDetailPage() {
           </div>
         )}
 
-        {/* BUG FIX: dùng showZaloPayBanner đã sửa ở trên */}
+        {}
         {showZaloPayBanner && (
           <div className="bg-blue-50 border-2 border-blue-400/40 text-blue-900 px-5 py-5 rounded-[1px] mb-8 relative" style={{ fontFamily: "'Cinzel', serif" }}>
             <div className="absolute inset-0.5 border border-blue-300/10 pointer-events-none" />
@@ -250,7 +250,7 @@ export function OrderDetailPage() {
             <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#140E0A] mb-4 border-b border-[#D4C4A8]/40 pb-2" style={{ fontFamily: "'Cinzel', serif" }}>
               💰 Đối Chiếu Ngân Khố
             </h2>
-            {/* BUG FIX: backend trả "subtotal" không phải "subtotalAmount" */}
+            {}
             <div className="text-xs uppercase tracking-wider font-bold text-stone-600 space-y-2 relative z-10" style={{ fontFamily: "'Cinzel', serif" }}>
               <div className="flex justify-between items-center">
                 <span>Nguyên ngân tinh</span>

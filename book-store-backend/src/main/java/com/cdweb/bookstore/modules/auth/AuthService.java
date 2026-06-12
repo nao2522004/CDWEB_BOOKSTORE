@@ -37,56 +37,56 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    // ─── Login ────────────────────────────────────────────────────────────────
+    
 
     @Transactional
     public LoginResponse login(LoginRequest request, HttpServletResponse response) {
-        // 1. Xác thực credentials
+        
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        // 2. Load user với roles
+        
         User user = userRepository.findByEmailWithRoles(request.email()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // 3. Tạo Access Token → trả về body
+        
         String accessToken = jwtService.buildAccessToken(auth, user);
 
-        // 4. Tạo/xoay vòng Refresh Token → set HttpOnly Cookie
+        
         String refreshTokenValue = jwtService.createOrRotateRefreshToken(user);
         jwtService.setRefreshTokenCookie(response, refreshTokenValue);
 
         return new LoginResponse(accessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(), user.getName(), user.getEmail());
     }
 
-    // ─── Refresh ──────────────────────────────────────────────────────────────
+    
 
     @Transactional
     public LoginResponse refresh(String cookieToken, HttpServletResponse response) {
-        // 1. Tìm refresh token trong DB
+        
         RefreshToken refreshToken = refreshTokenRepository.findByToken(cookieToken).orElseThrow(() -> new RuntimeException("Refresh token không hợp lệ"));
 
-        // 2. Kiểm tra hết hạn
+        
         if (refreshToken.isExpired()) {
             refreshTokenRepository.delete(refreshToken);
             jwtService.clearRefreshTokenCookie(response);
             throw new RuntimeException("Refresh token đã hết hạn, vui lòng đăng nhập lại");
         }
 
-        // 3. Build lại authentication từ user
+        
         User user = refreshToken.getUser();
         List<GrantedAuthority> authorities = user.getRoles().stream().map(r -> (GrantedAuthority) new SimpleGrantedAuthority(r.getName())).toList();
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 
-        // 4. Cấp Access Token mới
+        
         String newAccessToken = jwtService.buildAccessToken(auth, user);
 
-        // 5. Xoay vòng Refresh Token (Refresh Token Rotation)
+        
         String newRefreshToken = jwtService.rotateRefreshToken(refreshToken);
         jwtService.setRefreshTokenCookie(response, newRefreshToken);
 
         return new LoginResponse(newAccessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(), user.getName(), user.getEmail());
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
+    
 
     @Transactional
     public void logout(String cookieToken, HttpServletResponse response) {
@@ -96,7 +96,7 @@ public class AuthService {
         jwtService.clearRefreshTokenCookie(response);
     }
 
-    // ─── Register ─────────────────────────────────────────────────────────────
+    
 
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
@@ -114,7 +114,7 @@ public class AuthService {
         return RegisterResponse.fromUser(user);
     }
 
-    // ─── Change Password ──────────────────────────────────────────────────────
+    
 
     @Transactional
     public void changePassword(Long userId, com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest request) {

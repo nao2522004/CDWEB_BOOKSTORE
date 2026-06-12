@@ -76,7 +76,7 @@ export default function CartPage() {
 
                   <Link to={`/books/${item.bookId}`} className="flex-shrink-0 border border-[#D4C4A8]/60 p-1.5 bg-white aspect-[3/4] w-20">
                     <img
-                      // B2: backend trả bookCoverUrl (không phải coverImageUrl)
+                      
                       src={item.bookCoverUrl || PLACEHOLDER_BOOK}
                       alt={item.bookTitle}
                       className="w-full h-full object-cover"
@@ -93,7 +93,7 @@ export default function CartPage() {
                       >
                         {item.bookTitle}
                       </Link>
-                      {/* B2: backend trả unitPrice (không phải price) */}
+                      {}
                       <p className="text-xs uppercase tracking-wider font-bold text-[#8B6508]" style={{ fontFamily: "'Cinzel', serif" }}>
                         {formatPrice(item.unitPrice)}
                       </p>
@@ -119,7 +119,7 @@ export default function CartPage() {
                       </div>
 
                       <div className="flex items-center gap-5">
-                        {/* B2: dùng unitPrice */}
+                        {}
                         <span className="font-bold text-sm text-[#2C2114]" style={{ fontFamily: "'Cinzel', serif" }}>
                           {formatPrice(item.unitPrice * item.quantity)}
                         </span>

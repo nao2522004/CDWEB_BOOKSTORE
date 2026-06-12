@@ -216,7 +216,7 @@ export default function AdminCoupons() {
         width="max-w-2xl"
       >
         <form onSubmit={handleSubmit} className="space-y-5 py-2">
-          {/* Section 1: Thông tin cơ bản */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FAF8F5] p-3 rounded-lg border border-[#D4C4A8]/30">
             <FormField label="Mã Ưu Đãi (Mã viết hoa)" required>
               <AdminInput
@@ -239,7 +239,7 @@ export default function AdminCoupons() {
             </FormField>
           </div>
 
-          {/* Section 2: Định lượng giá trị chiết khấu */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <FormField label={form.type === 'PERCENTAGE' ? 'Mức Chiết Khấu (%)' : 'Số Tiền Giảm (VNĐ)'} required>
               <div className="relative">
@@ -275,7 +275,7 @@ export default function AdminCoupons() {
             </FormField>
           </div>
 
-          {/* Section 3: Giới hạn hành chính */}
+          {}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-b border-stone-200/60 py-4">
             <FormField label="Giới Hạn Tổng Lượt Dùng" hint="Để trống nếu vô hạn">
               <AdminInput type="number" value={form.usageLimit} onChange={v => setForm(f => ({ ...f, usageLimit: v }))} placeholder="100" />

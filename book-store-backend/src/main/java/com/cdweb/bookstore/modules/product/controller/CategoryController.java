@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Public endpoints – không cần đăng nhập.
- */
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor

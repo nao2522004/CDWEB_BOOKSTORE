@@ -18,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Admin quản lý toàn bộ đơn hàng:
- */
 @RestController
 @RequestMapping("/admin/orders")
 @RequiredArgsConstructor
@@ -31,10 +28,8 @@ public class AdminOrderController {
     private final OrderRepository orderRepository;
     private final OrderService    orderService;
 
-    /**
-     * GET /admin/orders?status=PENDING&page=0&size=20
-     * Lấy tất cả đơn hàng, tuỳ chọn lọc theo trạng thái, có phân trang.
-     */
+    
+
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getAllOrders(
             @RequestParam(required = false) Order.OrderStatus status,
@@ -48,10 +43,8 @@ public class AdminOrderController {
         return ApiResponse.ok(PageResponse.from(page.map(OrderResponse::fromOrder)));
     }
 
-    /**
-     * GET /admin/orders/{id}
-     * Xem chi tiết bất kỳ đơn hàng (không bị giới hạn userId).
-     */
+    
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetail(
             @PathVariable Long id) {
@@ -63,13 +56,8 @@ public class AdminOrderController {
         return ApiResponse.ok(OrderResponse.fromOrder(order));
     }
 
-    /**
-     * PATCH /admin/orders/{id}/status?status=CONFIRMED
-     * Cập nhật trạng thái đơn hàng theo state machine:
-     * PENDING → CONFIRMED → PROCESSING → SHIPPED → DELIVERED
-     *                                            ↘ CANCELLED / RETURNED
-     * Logic validate + hoàn tồn kho nằm trong OrderService.
-     */
+    
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
             @PathVariable Long id,
@@ -80,12 +68,8 @@ public class AdminOrderController {
                 "Cập nhật trạng thái đơn hàng thành công");
     }
 
-    /**
-     * PATCH /admin/orders/{id}/payment
-     * Cập nhật trạng thái thanh toán:
-     *   UNPAID → PAID      (xác nhận đã nhận tiền – BANKING/MOMO/ZALOPAY)
-     *   PAID   → REFUNDED  (hoàn tiền khi đơn bị huỷ/trả hàng)
-     */
+    
+
     @PatchMapping("/{id}/payment")
     public ResponseEntity<ApiResponse<OrderResponse>> updatePaymentStatus(
             @PathVariable Long id,

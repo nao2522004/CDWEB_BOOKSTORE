@@ -9,8 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CouponUsageRepository extends JpaRepository<CouponUsage, Long> {
 
-    /**
-     * Kiểm tra user đã từng dùng coupon này chưa.
-     */
+    
+
     boolean existsByCouponAndUser(Coupon coupon, User user);
 }

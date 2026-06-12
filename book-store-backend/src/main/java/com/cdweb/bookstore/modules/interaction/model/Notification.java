@@ -30,7 +30,7 @@ public class Notification {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private NotificationType type;  // ORDER, PROMOTION, SYSTEM …
+    private NotificationType type;  
 
     @Column(name = "is_read")
     @Builder.Default
