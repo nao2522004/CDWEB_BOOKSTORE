@@ -80,8 +80,8 @@ public class JwtService {
     public void setRefreshTokenCookie(HttpServletResponse response, String tokenValue) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", tokenValue)
                 .httpOnly(true)
-                .secure(true)           // Đổi thành false khi test local HTTP
-                .path("/")              // Chỉ gửi cookie cho endpoint này
+                .secure(true)           
+                .path("/")              
                 .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
                 .sameSite("Lax")
                 .build();

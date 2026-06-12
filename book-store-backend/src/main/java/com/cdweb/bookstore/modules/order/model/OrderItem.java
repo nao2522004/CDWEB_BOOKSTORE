@@ -33,15 +33,13 @@ public class OrderItem {
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
-    /**
-     * Snapshot tên sách lúc đặt hàng (phòng trường hợp sách đổi tên)
-     */
+    
+
     @Column(name = "book_title_snapshot")
     private String bookTitleSnapshot;
 
-    /**
-     * Snapshot ảnh bìa lúc đặt hàng
-     */
+    
+
     @Column(name = "book_cover_snapshot")
     private String bookCoverSnapshot;
 

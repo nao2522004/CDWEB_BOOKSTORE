@@ -36,7 +36,7 @@ public class User {
     private String avatarUrl;
 
     @Enumerated(EnumType.STRING)
-    private Provider provider;   // LOCAL, GOOGLE, FACEBOOK …
+    private Provider provider;   
 
     @Column(name = "provider_id")
     private String providerId;
@@ -44,7 +44,7 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    // --- relationships ---
+    
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))

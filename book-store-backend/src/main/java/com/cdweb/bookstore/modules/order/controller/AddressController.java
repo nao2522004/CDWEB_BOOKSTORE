@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * User tự quản lý địa chỉ giao hàng của mình.
- */
 @RestController
 @RequestMapping("/addresses")
 @RequiredArgsConstructor
@@ -26,14 +23,14 @@ public class AddressController {
 
     private final AddressService addressService;
 
-    /** GET /addresses – danh sách địa chỉ của tôi */
+    
     @GetMapping
     public ResponseEntity<ApiResponse<List<AddressResponse>>> getMyAddresses(
             @AuthenticationPrincipal Jwt jwt) {
         return ApiResponse.ok(addressService.getMyAddresses(extractUserId(jwt)));
     }
 
-    /** POST /addresses – thêm địa chỉ mới */
+    
     @PostMapping
     public ResponseEntity<ApiResponse<AddressResponse>> addAddress(
             @Valid @RequestBody AddressRequest request,
@@ -42,7 +39,7 @@ public class AddressController {
         return ApiResponse.created(response, "Thêm địa chỉ thành công");
     }
 
-    /** PUT /addresses/{id} – cập nhật địa chỉ */
+    
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AddressResponse>> updateAddress(
             @PathVariable Long id,
@@ -52,7 +49,7 @@ public class AddressController {
         return ApiResponse.ok(response, "Cập nhật địa chỉ thành công");
     }
 
-    /** PATCH /addresses/{id}/default – đặt làm địa chỉ mặc định */
+    
     @PatchMapping("/{id}/default")
     public ResponseEntity<ApiResponse<AddressResponse>> setDefault(
             @PathVariable Long id,
@@ -61,7 +58,7 @@ public class AddressController {
         return ApiResponse.ok(response, "Đã đặt làm địa chỉ mặc định");
     }
 
-    /** DELETE /addresses/{id} – xóa địa chỉ (không xóa được default) */
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteAddress(
             @PathVariable Long id,

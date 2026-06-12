@@ -26,7 +26,7 @@ export default function AdminLayout() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full justify-between">
       <div className="flex flex-col overflow-hidden">
-        {/* Logo */}
+        {}
         <div className="px-5 h-[73px] flex items-center border-b border-[#D4C4A8]/60 bg-[#FAF5EC] flex-shrink-0">
           <Link to="/" className="flex items-center gap-3 group w-full">
             <span className="text-[#8B6508] text-base transition-transform duration-700 group-hover:rotate-180 bg-[#8B6508]/5 w-9 h-9 flex items-center justify-center rounded-lg border border-[#8B6508]/20 shadow-sm flex-shrink-0">
@@ -47,7 +47,7 @@ export default function AdminLayout() {
           </Link>
         </div>
 
-        {/* Navigation */}
+        {}
         <nav className="p-3 space-y-1.5 overflow-y-auto flex-1">
           {NAV_ITEMS.map(item => (
             <NavLink
@@ -63,13 +63,13 @@ export default function AdminLayout() {
               }
               style={{ fontFamily: "'Cinzel', serif" }}
             >
-              {/* Thanh chỉ báo Active thanh lịch ở rìa trái */}
+              {}
               {({ isActive }) => (
                 <>
                   {isActive && (
                     <span className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-[#8B6508] rounded-r-md" />
                   )}
-                  {/* Khung Icon */}
+                  {}
                   <span className="text-sm w-5 h-5 flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110 leading-none antialiased">
                     {item.icon}
                   </span>
@@ -83,7 +83,7 @@ export default function AdminLayout() {
         </nav>
       </div>
 
-      {/* User Section */}
+      {}
       <div className="border-t border-[#D4C4A8]/60 p-3 bg-[#FAF5EC]">
         {!collapsed && (
           <div className="flex items-center gap-3 p-2 rounded-lg bg-[#F5EFE2] border border-[#D4C4A8]/40 mb-2">
@@ -112,14 +112,14 @@ export default function AdminLayout() {
   return (
     <div className="flex h-screen bg-[#F3EFE6] text-[#2C2114] antialiased overflow-hidden selection:bg-[#8B6508]/10">
 
-      {/* Desktop Sidebar */}
+      {}
       <aside
         className={`hidden md:flex flex-col flex-shrink-0 bg-[#FAF5EC] border-r border-[#D4C4A8]/80 transition-all duration-300 ease-in-out relative ${collapsed ? 'w-20' : 'w-64'
           }`}
       >
         <SidebarContent />
 
-        {/* Nút thu gọn */}
+        {}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 bg-[#FAF5EC] border border-[#D4C4A8] text-[#8B6508] text-xs flex items-center justify-center transition-all duration-200 z-20 shadow-sm rounded-full hover:bg-[#8B6508] hover:text-[#FAF5EC]"
@@ -128,7 +128,7 @@ export default function AdminLayout() {
         </button>
       </aside>
 
-      {/* Mobile Sidebar */}
+      {}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-[#2C2114]/40 backdrop-blur-xs" onClick={() => setMobileOpen(false)} />
@@ -138,10 +138,10 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Topbar Header */}
+        {}
         <header className="bg-[#FAF5EC] border-b border-[#D4C4A8]/60 px-6 h-[73px] flex items-center justify-between flex-shrink-0">
           <button
             className="md:hidden text-stone-500 hover:text-[#8B6508] p-1"
@@ -150,7 +150,7 @@ export default function AdminLayout() {
             ☰
           </button>
 
-          {/* Breadcrumbs */}
+          {}
           <div className="hidden md:flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] font-bold text-stone-400"
             style={{ fontFamily: "'Cinzel', serif" }}>
             <Link to="/" className="hover:text-[#8B6508] transition-colors">Thư Viện</Link>
@@ -158,7 +158,7 @@ export default function AdminLayout() {
             <span className="text-[#8B6508] font-black">Biện Giám</span>
           </div>
 
-          {/* Button Về Trang Chủ */}
+          {}
           <div className="flex items-center ml-auto">
             <Link
               to="/"
@@ -170,7 +170,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        {/* Page Content */}
+        {}
         <main className="flex-1 overflow-y-auto p-6 bg-[#F3EFE6]">
           <div className="max-w-7xl mx-auto">
             <Outlet />

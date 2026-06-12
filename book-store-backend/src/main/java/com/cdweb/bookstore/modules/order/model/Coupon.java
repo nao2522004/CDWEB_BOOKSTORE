@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-// ─── Coupon ───────────────────────────────────────────────────────────────────
 @Entity
 @Table(name = "coupons")
 @Getter
@@ -27,7 +26,7 @@ public class Coupon {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CouponType type;   // PERCENTAGE, FIXED_AMOUNT
+    private CouponType type;   
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal value;
@@ -52,7 +51,7 @@ public class Coupon {
     private Instant endDate;
 
     @Enumerated(EnumType.STRING)
-    private CouponStatus status;   // ACTIVE, INACTIVE, EXPIRED
+    private CouponStatus status;   
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;

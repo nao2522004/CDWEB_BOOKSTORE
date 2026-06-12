@@ -8,10 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Admin endpoints để quản lý danh mục.
- * User chỉ đọc → CategoryController (/categories).
- */
 @RestController
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor

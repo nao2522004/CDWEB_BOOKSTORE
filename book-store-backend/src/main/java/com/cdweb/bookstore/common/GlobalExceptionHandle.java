@@ -19,8 +19,8 @@ public class GlobalExceptionHandle {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleException(Exception ex) {
-		System.out.println(ex);
-		return ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
+		ex.printStackTrace();
+		return ApiResponse.error("Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.", "INTERNAL_SERVER_ERROR");
 	}
 
 	@ExceptionHandler(EntityNotFoundException.class)
@@ -33,15 +33,15 @@ public class GlobalExceptionHandle {
 		return ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
 	}
 
-	// xu ly ngoai le chu url neu sai dinh dang
+	
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 		String errorMessage = String.format("Tham số '%s' có giá trị '%s' không đúng định dạng.", ex.getName(),
 				ex.getValue());
-		return ApiResponse.error(HttpStatus.BAD_REQUEST + "", errorMessage);
+		return ApiResponse.error(errorMessage, HttpStatus.BAD_REQUEST.name());
 	}
 
-	// xu ly validate cho du lieu duoc gui len tu client
+	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		List<String> errorList = ex.getBindingResult().getFieldErrors().stream()

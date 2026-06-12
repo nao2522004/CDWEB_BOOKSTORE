@@ -21,11 +21,8 @@ import com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest;
 public class AuthController {
 
     private final AuthService authService;
-    /**
-     * POST /auth/login
-     * → Access Token trả về JSON body
-     * → Refresh Token set vào HttpOnly Cookie
-     */
+    
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest request,
@@ -34,12 +31,8 @@ public class AuthController {
         return ApiResponse.ok(data, "Đăng nhập thành công");
     }
 
-    /**
-     * POST /auth/refresh
-     * → Đọc Refresh Token từ Cookie
-     * → Trả về Access Token mới trong Body
-     * → Xoay vòng Refresh Token (set Cookie mới)
-     */
+    
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refresh(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
@@ -51,10 +44,8 @@ public class AuthController {
         return ApiResponse.ok(data, "Lấy Access Token mới thành công");
     }
 
-    /**
-     * POST /auth/logout
-     * → Xoá Refresh Token khỏi DB + clear Cookie
-     */
+    
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
@@ -63,9 +54,8 @@ public class AuthController {
         return ApiResponse.ok(null, "Đăng xuất thành công");
     }
 
-    /**
-     * POST /auth/register
-     */
+    
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
@@ -73,9 +63,8 @@ public class AuthController {
         return ApiResponse.created(user, "Đăng ký tài khoản người dùng thành công");
     }
 
-    /**
-     * PUT /auth/change-password
-     */
+    
+
     @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,

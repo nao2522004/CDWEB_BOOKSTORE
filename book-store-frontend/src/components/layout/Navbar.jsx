@@ -21,14 +21,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
 
-
           <Link to="/" className="flex items-center gap-2.5 tracking-[0.25em] font-medium transition-all duration-300 hover:opacity-90 group">
             <span className="text-xl text-[#8B6508] transition-transform duration-500 group-hover:rotate-180">❖</span>
             <span className="text-lg md:text-xl uppercase font-bold text-[#140E0A] group-hover:text-[#8B6508] transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>
               Bibliotheca
             </span>
           </Link>
-
 
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-12 group">
             <div className="relative w-full border-b border-[#2C2114]/30 focus-within:border-[#8B6508] transition-all duration-300 pb-1.5 flex items-center">

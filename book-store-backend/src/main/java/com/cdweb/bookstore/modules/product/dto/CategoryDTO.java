@@ -12,6 +12,6 @@ public class CategoryDTO {
     private String slug;
     private String description;
 
-    // Chỉ cần ID của danh mục cha, không cần bê nguyên object Category vào đây
+    
     private Long parentId;
 }

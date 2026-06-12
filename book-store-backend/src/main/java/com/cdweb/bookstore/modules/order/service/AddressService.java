@@ -29,12 +29,12 @@ public class AddressService {
     public AddressResponse addAddress(Long userId, AddressRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("Người dùng không tồn tại"));
 
-        // Nếu đây là địa chỉ default → bỏ default của địa chỉ cũ
+        
         if (request.isDefault()) {
             clearCurrentDefault(userId);
         }
 
-        // Nếu chưa có địa chỉ nào → tự động đặt làm default
+        
         boolean hasNoAddress = addressRepository.findByUserId(userId).isEmpty();
 
         Address address = Address.builder().user(user).fullName(request.fullName()).phone(request.phone()).street(request.street()).ward(request.ward()).district(request.district()).province(request.province()).isDefault(request.isDefault() || hasNoAddress).build();

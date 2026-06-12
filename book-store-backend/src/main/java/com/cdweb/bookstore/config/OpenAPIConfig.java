@@ -36,9 +36,9 @@ public class OpenAPIConfig {
     private Contact createContact() {
         // @formatter:off
         return new Contact()
-                .email("your-email@example.com") // Thay bằng email của bạn
+                .email("your-email@example.com") 
                 .name("Bookstore Admin Team")
-                .url("https://yourbookstore.vn"); // Website dự án của bạn
+                .url("https://yourbookstore.vn"); 
         // @formatter:on
     }
 
@@ -49,7 +49,7 @@ public class OpenAPIConfig {
     private Info createApiInfo() {
         // @formatter:off
         return new Info()
-                .title("Bookstore API Documentation") // Tên dự án của bạn
+                .title("Bookstore API Documentation") 
                 .version("1.0.0")
                 .contact(createContact())
                 .description("Tài liệu API chi tiết cho hệ thống quản lý cửa hàng sách (Backend Services).")

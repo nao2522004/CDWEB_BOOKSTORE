@@ -26,19 +26,15 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             "OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.slug) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Book> searchBooks(@Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
-    /**
-     * Trừ tồn kho ATOMIC: Chống Race Condition bằng cách gộp "Kiểm tra & Cập nhật"
-     * vào 1 câu lệnh duy nhất dưới DB.
-     */
+    
+
     @Modifying
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity - :qty " +
             "WHERE b.id = :id AND b.stockQuantity >= :qty")
     int decreaseStock(@Param("id") Long id, @Param("qty") int qty);
 
-    /**
-     * Hoàn tồn kho nguyên tử: Đảm bảo tính nhất quán dữ liệu khi nhiều đơn hàng
-     * cùng bị hủy/hoàn trả đồng thời.
-     */
+    
+
     @Modifying
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity + :qty WHERE b.id = :id")
     void increaseStock(@Param("id") Long id, @Param("qty") int qty);

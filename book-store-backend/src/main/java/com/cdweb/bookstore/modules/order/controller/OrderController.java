@@ -15,10 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * User endpoints – chỉ thao tác trên đơn hàng của chính mình.
- * Admin quản lý đơn hàng → AdminOrderController (/admin/orders).
- */
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -29,7 +25,7 @@ public class OrderController {
     private final CheckoutService checkoutService;
     private final OrderService    orderService;
 
-    /** POST /orders/checkout */
+    
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<OrderResponse>> checkout(
             @Valid @RequestBody CheckoutRequest request,
@@ -39,7 +35,7 @@ public class OrderController {
         return ApiResponse.created(order, "Đặt hàng thành công! Mã đơn: #" + order.id());
     }
 
-    /** GET /orders – danh sách đơn hàng của chính mình */
+    
     @GetMapping
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(
             @AuthenticationPrincipal Jwt jwt) {
@@ -47,7 +43,7 @@ public class OrderController {
         return ApiResponse.ok(orderService.getOrdersByUser(extractUserId(jwt)));
     }
 
-    /** GET /orders/{id} – chi tiết đơn hàng (chỉ xem được của mình) */
+    
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetail(
             @PathVariable Long id,
@@ -56,7 +52,7 @@ public class OrderController {
         return ApiResponse.ok(orderService.getOrderDetail(id, extractUserId(jwt)));
     }
 
-    /** PATCH /orders/{id}/cancel – user tự hủy đơn (PENDING / CONFIRMED) */
+    
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(
             @PathVariable Long id,

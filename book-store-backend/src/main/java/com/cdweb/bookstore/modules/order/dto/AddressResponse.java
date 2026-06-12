@@ -10,7 +10,7 @@ public record AddressResponse(
         String ward,
         String district,
         String province,
-        String fullAddress,   // chuỗi hiển thị đầy đủ
+        String fullAddress,   
         boolean isDefault
 ) {
     public static AddressResponse from(Address address) {

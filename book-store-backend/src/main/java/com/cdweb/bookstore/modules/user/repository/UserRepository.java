@@ -11,7 +11,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     boolean existsByEmail(String email);
 
-    // Fetch roles eagerly để tránh LazyInitializationException khi build JWT
+    
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.email = :email")
     Optional<User> findByEmailWithRoles(String email);
 

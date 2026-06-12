@@ -22,20 +22,16 @@ public class CartController {
 
     private final CartService cartService;
 
-    /**
-     * GET /cart
-     * Lấy giỏ hàng của user hiện tại (tự động tạo nếu chưa có).
-     */
+    
+
     @GetMapping
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
             @AuthenticationPrincipal Jwt jwt) {
         return ApiResponse.ok(cartService.getCart(extractUserId(jwt)));
     }
 
-    /**
-     * POST /cart/items
-     * Thêm sách vào giỏ (nếu sách đã có → cộng dồn số lượng).
-     */
+    
+
     @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartResponse>> addItem(
             @Valid @RequestBody AddToCartRequest request,
@@ -44,10 +40,8 @@ public class CartController {
         return ApiResponse.ok(cart, "Thêm sách vào giỏ hàng thành công");
     }
 
-    /**
-     * PUT /cart/items/{bookId}
-     * Cập nhật số lượng của một sản phẩm trong giỏ (ghi đè, không cộng dồn).
-     */
+    
+
     @PutMapping("/items/{bookId}")
     public ResponseEntity<ApiResponse<CartResponse>> updateItem(
             @PathVariable Long bookId,
@@ -57,10 +51,8 @@ public class CartController {
         return ApiResponse.ok(cart, "Cập nhật giỏ hàng thành công");
     }
 
-    /**
-     * DELETE /cart/items/{bookId}
-     * Xóa một sản phẩm khỏi giỏ hàng.
-     */
+    
+
     @DeleteMapping("/items/{bookId}")
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
             @PathVariable Long bookId,
@@ -69,10 +61,8 @@ public class CartController {
         return ApiResponse.ok(cart, "Xóa sản phẩm khỏi giỏ hàng thành công");
     }
 
-    /**
-     * DELETE /cart
-     * Xóa toàn bộ giỏ hàng.
-     */
+    
+
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> clearCart(
             @AuthenticationPrincipal Jwt jwt) {

@@ -5,7 +5,6 @@ import BookCard from '../components/book/BookCard';
 import { Empty } from '../components/common';
 import { BookCardSkeletonGrid } from '../components/book/BookCardSkeleton';
 
-//  HOA TIẾT PHÂN ĐOẠN VĂN BẢN 
 function OrnamentalDivider({ color = "#8B6508" }) {
   return (
     <div className="flex items-center gap-4 w-full my-12 opacity-70 select-none animate-fade-in">
@@ -18,7 +17,6 @@ function OrnamentalDivider({ color = "#8B6508" }) {
   );
 }
 
-//  KỆ SÁCH 
 function InteractiveBookShelf() {
   const [hovered, setHovered] = useState(null);
   const SPINE_COLORS = ["#1A2A40", "#5C201E", "#234427", "#3E1B50", "#735220", "#20424C"];
@@ -109,13 +107,10 @@ export default function HomePage() {
         rel="stylesheet"
       />
 
-
       <div className="max-w-7xl mx-auto border-x border-[#C4B498]/40 lg:border-x-4 lg:border-double lg:border-[#C4B498]/80 bg-[#FAF3E3] shadow-[0_0_60px_rgba(38,28,18,0.15)] relative">
-
 
         <div className="absolute inset-y-0 left-6 w-[1px] border-l border-dashed border-[#C4B498]/30 pointer-events-none hidden lg:block" />
         <div className="absolute inset-y-0 right-6 w-[1px] border-r border-dashed border-[#C4B498]/30 pointer-events-none hidden lg:block" />
-
 
         <section className="border-b border-[#C4B498]/60 py-20 px-6 md:px-16 relative overflow-hidden">
           <div className="absolute inset-6 border border-[#8B6508]/20 pointer-events-none rounded-[2px]" />
@@ -134,7 +129,6 @@ export default function HomePage() {
               "Nơi lưu giữ những hệ tư tưởng vĩ đại làm thay đổi sâu sắc toàn bộ dòng chảy lịch sử và nền văn minh nhân loại qua muôn vàn thế kỷ thịnh suy."
             </div>
 
-
             <form onSubmit={handleSearch} className="flex max-w-lg mx-auto gap-3 border-b-2 border-[#261C12]/80 pb-3 focus-within:border-[#8B6508] transition-all duration-300 group px-2">
               <span className="text-[#A8967E] group-focus-within:text-[#8B6508] transition-colors duration-300">🔍</span>
               <input
@@ -151,12 +145,9 @@ export default function HomePage() {
           </div>
         </section>
 
-
         <div className="grid grid-cols-1 lg:grid-cols-4 border-b border-[#C4B498]/60">
 
-
           <div className="lg:col-span-3 p-6 md:p-12 space-y-16 border-r-0 lg:border-r border-[#C4B498]/60">
-
 
             {categories.length > 0 && (
               <div>
@@ -193,7 +184,6 @@ export default function HomePage() {
 
             <OrnamentalDivider />
 
-
             <div>
               <div className="flex items-end justify-between mb-8 border-b border-[#C4B498] pb-4">
                 <h2 className="text-2xl font-serif font-bold text-[#140E0A] tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -221,15 +211,12 @@ export default function HomePage() {
 
           </div>
 
-
           <div className="bg-[#F4ECE0]/80 p-8 space-y-12 font-serif text-sm border-t lg:border-t-0 border-[#C4B498]/60">
-
 
             <div className="border-b border-[#C4B498]/60 pb-8 text-center">
               <span className="text-[10px] uppercase font-extrabold text-[#8B6508] tracking-[0.2em] block mb-3" style={{ fontFamily: "'Cinzel', serif" }}>TỦ CỔ THƯ VIRTUAL</span>
               <InteractiveBookShelf />
             </div>
-
 
             <div className="border-b border-[#C4B498]/60 pb-8 space-y-4 relative">
               <span className="absolute top-0 right-0 text-4xl text-[#C4B498]/30 font-serif pointer-events-none select-none">“</span>
@@ -241,7 +228,6 @@ export default function HomePage() {
               </p>
               <span className="block text-right text-xs font-bold text-[#8B6508] tracking-wide" style={{ fontFamily: "'Cinzel', serif" }}>— Socrates</span>
             </div>
-
 
             <div className="border-b border-[#C4B498]/60 pb-8 space-y-4">
               <h4 className="text-xs uppercase font-extrabold text-[#140E0A] tracking-wider border-l-2 border-[#8B6508] pl-3" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -263,7 +249,6 @@ export default function HomePage() {
               </div>
             </div>
 
-
             <div className="space-y-4 bg-[#FAF3E3]/40 p-4 border border-[#C4B498]/40 rounded-[2px]">
               <h4 className="text-xs uppercase font-extrabold text-[#140E0A] tracking-wider border-l-2 border-[#8B6508] pl-2" style={{ fontFamily: "'Cinzel', serif" }}>
                 Thư Sảnh Nhật Ký
@@ -276,7 +261,6 @@ export default function HomePage() {
           </div>
 
         </div>
-
 
         <section className="p-6 md:p-12 bg-[#FAF3E3]">
           <div className="bg-[#1E1410] text-[#FAF3E3] py-16 px-6 md:px-12 rounded-[2px] text-center border-2 border-double border-[#8B6508] relative overflow-hidden shadow-2xl group">

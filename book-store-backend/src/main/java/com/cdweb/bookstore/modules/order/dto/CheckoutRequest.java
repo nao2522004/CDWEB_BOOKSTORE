@@ -11,7 +11,7 @@ public record CheckoutRequest(
         @NotNull(message = "Phương thức thanh toán không được để trống")
         Order.PaymentMethod paymentMethod,
 
-        // null = không dùng mã giảm giá
+        
         String couponCode,
 
         String note

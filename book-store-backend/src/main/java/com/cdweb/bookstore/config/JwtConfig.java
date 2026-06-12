@@ -44,10 +44,8 @@ public class JwtConfig {
         return converter;
     }
 
-    /**
-     * Đăng ký ObjectMapper (JacksonAutoConfiguration).
-     * ZaloPayPaymentService dùng để parse JSON callback từ ZaloPay.
-     */
+    
+
     @Bean
     @ConditionalOnMissingBean
     public ObjectMapper objectMapper() {

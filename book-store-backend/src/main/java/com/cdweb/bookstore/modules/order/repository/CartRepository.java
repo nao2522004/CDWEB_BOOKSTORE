@@ -11,9 +11,8 @@ import java.util.Optional;
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
-    /**
-     * Dùng LEFT JOIN FETCH để trả về cart kể cả khi giỏ hàng đang trống.
-     */
+    
+
     @Query("""
             SELECT c FROM Cart c
             LEFT JOIN FETCH c.items ci

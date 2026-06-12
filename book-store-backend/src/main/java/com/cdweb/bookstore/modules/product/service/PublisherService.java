@@ -59,9 +59,8 @@ public class PublisherService {
         publisherRepository.delete(publisher);
     }
 
-    /**
-     * Hàm helper: Chỉ map những trường khác null từ DTO sang Object
-     */
+    
+
     private PublisherDTO toDTO(Publisher publisher) {
         return PublisherDTO.builder().id(publisher.getId()).name(publisher.getName()).description(publisher.getDescription()).website(publisher.getWebsite()).build();
     }

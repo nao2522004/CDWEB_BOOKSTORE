@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Admin CRUD cho Coupon.
- * User xem trước mã → CouponUserController (/coupons/preview).
- */
 @RestController
 @RequestMapping("/admin/coupons")
 @RequiredArgsConstructor

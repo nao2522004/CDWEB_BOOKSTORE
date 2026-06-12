@@ -15,10 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
-/**
- * User endpoint: xem trước mã giảm giá trước khi checkout.
- * Admin CRUD coupon → AdminCouponController (/admin/coupons).
- */
 @RestController
 @RequestMapping("/coupons")
 @RequiredArgsConstructor
@@ -28,9 +24,8 @@ public class CouponUserController {
     private final CouponService  couponService;
     private final UserRepository userRepository;
 
-    /**
-     * GET /coupons/preview?code=SUMMER10&subtotal=500000
-     */
+    
+
     @GetMapping("/preview")
     public ResponseEntity<ApiResponse<CouponValidationResponse>> previewCoupon(
             @RequestParam String code,

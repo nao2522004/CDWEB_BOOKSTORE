@@ -3,34 +3,26 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { paymentAPI } from '../api';
 import { Spinner } from '../components/common';
 
-/**
- * /payment/zalopay/return
- *
- * ZaloPay redirect về đây sau khi user thanh toán (thành công hoặc huỷ).
- * Query params ZaloPay trả về: status, apptransid, amount, checksum, ...
- *   status=1 → thành công
- *   status=2 → thất bại / huỷ
- */
 export default function ZaloPayReturnPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // ZaloPay truyền orderId qua embedData → ta nhúng orderId vào apptransid
-  // apptransid có dạng: YYMMDD_<orderId>_<timestamp>
+  
+  
   const appTransId = searchParams.get('apptransid') || '';
-  const statusParam = searchParams.get('status');   // "1" = ok, "2" = fail
+  const statusParam = searchParams.get('status');   
   const isPaid = statusParam === '1';
 
-  // Trích orderId từ apptransid: YYMMDD_<orderId>_...
+  
   const orderId = (() => {
     const parts = appTransId.split('_');
-    // Format: YYMMDD_orderId_timestamp — orderId là phần thứ 2
+    
     if (parts.length >= 2) return parts[1];
     return null;
   })();
 
   const [syncing, setSyncing] = useState(true);
-  const [syncResult, setSyncResult] = useState(null); // ZaloPayTransaction từ backend
+  const [syncResult, setSyncResult] = useState(null); 
   const [syncError, setSyncError] = useState('');
   const pollRef = useRef(null);
   const MAX_POLLS = 6;
@@ -69,14 +61,14 @@ export default function ZaloPayReturnPage() {
       }
     };
 
-    // Gọi ngay lập tức rồi poll mỗi 2s
+    
     poll();
     pollRef.current = setInterval(poll, 2000);
 
     return () => clearInterval(pollRef.current);
   }, [orderId]);
 
-  // Tự động chuyển hướng sau 6 giây nếu có orderId
+  
   useEffect(() => {
     if (!syncing && orderId) {
       const t = setTimeout(() => {
@@ -86,7 +78,7 @@ export default function ZaloPayReturnPage() {
     }
   }, [syncing, orderId, navigate]);
 
-  /*  Render helpers  */
+  
 
   const finalStatus = syncResult?.status ?? (isPaid ? 'SUCCESS' : 'FAILED');
   const isSuccess = finalStatus === 'SUCCESS';
@@ -97,12 +89,12 @@ export default function ZaloPayReturnPage() {
 
       <div className="w-full max-w-md text-center">
 
-        {/* Card */}
+        {}
         <div className="bg-[#FAF5EC] border-2 border-[#2C2114]/70 p-10 shadow-xl relative">
           <div className="absolute inset-1.5 border border-[#8B6508]/10 pointer-events-none" />
 
           {syncing ? (
-            /*  Đang xác minh  */
+            
             <div className="space-y-6">
               <div className="flex justify-center">
                 <Spinner size="lg" />
@@ -117,9 +109,9 @@ export default function ZaloPayReturnPage() {
             </div>
 
           ) : isSuccess ? (
-            /*  Thành công  */
+            
             <div className="space-y-5">
-              {/* Icon thành công */}
+              {}
               <div className="flex justify-center">
                 <div className="relative w-20 h-20">
                   <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-30" />
@@ -171,9 +163,9 @@ export default function ZaloPayReturnPage() {
             </div>
 
           ) : (
-            /*  Thất bại / Huỷ  */
+            
             <div className="space-y-5">
-              {/* Icon thất bại */}
+              {}
               <div className="flex justify-center">
                 <div className="w-20 h-20 rounded-full bg-red-50 border-2 border-red-300/50 flex items-center justify-center">
                   <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +210,7 @@ export default function ZaloPayReturnPage() {
           )}
         </div>
 
-        {/* ZaloPay badge */}
+        {}
         <div className="mt-6 flex items-center justify-center gap-2 opacity-50">
           <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center">
             <span className="text-white text-[8px] font-black">Z</span>

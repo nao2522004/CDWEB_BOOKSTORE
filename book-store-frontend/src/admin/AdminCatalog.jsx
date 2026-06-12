@@ -14,7 +14,6 @@ function slugify(str) {
     .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
 }
 
-//  CATEGORIES 
 const EMPTY_CAT = { name: '', slug: '', description: '', parentId: '' };
 
 export function AdminCategories() {
@@ -184,7 +183,6 @@ export function AdminCategories() {
   );
 }
 
-//  AUTHORS 
 const EMPTY_AUTHOR = { name: '', bio: '', avatarUrl: '' };
 
 export function AdminAuthors() {
@@ -316,7 +314,7 @@ export function AdminAuthors() {
                 <AdminInput value={form.avatarUrl} onChange={v => setForm(f => ({ ...f, avatarUrl: v }))} placeholder="https://link-anh.com/avatar.jpg" className="text-xs" />
               </FormField>
             </div>
-            {/* Khung xem trước Avatar thu nhỏ */}
+            {}
             <div className="flex flex-col items-center justify-center p-3 bg-[#FAF8F5] border border-stone-200 rounded-lg h-full min-h-[110px]">
               <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mb-2">Xem Trước</span>
               {form.avatarUrl ? (
@@ -345,7 +343,6 @@ export function AdminAuthors() {
   );
 }
 
-//  PUBLISHERS 
 const EMPTY_PUB = { name: '', description: '', website: '' };
 
 export function AdminPublishers() {

@@ -28,9 +28,9 @@ public class Address {
     private String phone;
 
     private String street;
-    private String ward;      // Phường/Xã
-    private String district;  // Quận/Huyện
-    private String province;  // Tỉnh/Thành phố
+    private String ward;      
+    private String district;  
+    private String province;  
 
     @Column(name = "is_default")
     private boolean isDefault;

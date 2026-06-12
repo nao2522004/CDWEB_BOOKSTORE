@@ -29,9 +29,8 @@ public class Review {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    /**
-     * 1–5 sao
-     */
+    
+
     @Column(nullable = false)
     private Integer rating;
 

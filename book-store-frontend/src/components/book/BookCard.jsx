@@ -8,7 +8,7 @@ export default function BookCard({ book }) {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
-  // B2: tính discountPercent ở client vì backend không trả trường này
+  
   const discountPercent = getDiscountPercent(book);
 
   const handleAddToCart = async (e) => {

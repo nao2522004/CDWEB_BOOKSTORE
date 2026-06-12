@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Admin endpoints để quản lý nhà xuất bản.
- */
 @RestController
 @RequestMapping("/admin/publishers")
 @RequiredArgsConstructor

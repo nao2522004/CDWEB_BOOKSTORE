@@ -18,15 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Sau khi Google xác thực thành công:
- * 1. Lấy user từ DB (đã upsert bởi CustomOAuth2UserService)
- * 2. Tạo Access Token + Refresh Token
- * 3. Redirect về frontend kèm access_token trong query string
- *
- * Frontend URL nhận token:
- * http://localhost:3000/auth/callback?token=xxx&userId=yyy
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +26,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    /** URL frontend xử lý callback — đổi thành domain thực khi deploy */
+    
     private static final String FRONTEND_REDIRECT_URL = "http://localhost:3000/auth/callback";
 
     @Override
@@ -44,7 +35,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // userId được inject bởi CustomOAuth2UserService
+        
         Object userIdRaw = oAuth2User.getAttribute("userId");
         if (userIdRaw == null) {
             log.error("Google OAuth2 success: thiếu userId trong attributes");
@@ -60,18 +51,18 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             return;
         }
 
-        // Build Authentication object với roles để tạo JWT
+        
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(r -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + r.getName()))
                 .toList();
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), null, authorities);
 
-        // Tạo JWT
+        
         String accessToken = jwtService.buildAccessToken(auth, user);
         String refreshToken = jwtService.createOrRotateRefreshToken(user);
 
-        // Set refresh token vào HttpOnly Cookie
+        
         jwtService.setRefreshTokenCookie(response, refreshToken);
 
         String redirectUrl = UriComponentsBuilder.fromUriString(FRONTEND_REDIRECT_URL)

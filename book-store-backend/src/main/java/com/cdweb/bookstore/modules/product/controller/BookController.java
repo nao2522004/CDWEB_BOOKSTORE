@@ -10,10 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Public endpoints – không cần đăng nhập.
- * Mọi thao tác write (create/update/delete) chuyển sang AdminBookController.
- */
 @RestController
 @RequestMapping("/books")
 @RequiredArgsConstructor

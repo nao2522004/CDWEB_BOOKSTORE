@@ -7,15 +7,15 @@ import { formatPrice, formatDate, getOrderStatusColor, getOrderStatusLabel } fro
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'addresses', or 'orders'
+  const [activeTab, setActiveTab] = useState('profile'); 
 
-  // Profile/Password States
+  
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwLoading, setPwLoading] = useState(false);
   const [pwSuccess, setPwSuccess] = useState('');
   const [pwError, setPwError] = useState('');
 
-  // Address States
+  
   const [addresses, setAddresses] = useState([]);
   const [addrLoading, setAddrLoading] = useState(false);
   const [addrError, setAddrError] = useState('');
@@ -27,13 +27,12 @@ export default function ProfilePage() {
   });
   const [addrErrors, setAddrErrors] = useState({});
 
-  // Order States
+  
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState('');
   const [ordersPage, setOrdersPage] = useState(1);
   const ordersPerPage = 5;
-
 
   useEffect(() => {
     if (activeTab === 'addresses') {
@@ -68,7 +67,6 @@ export default function ProfilePage() {
       setOrdersLoading(false);
     }
   };
-
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -105,7 +103,7 @@ export default function ProfilePage() {
 
   const handleAddOrUpdateAddress = async (e) => {
     e.preventDefault();
-    // Validate all fields
+    
     const errors = {};
     Object.keys(newAddr).forEach(key => {
       if (key !== 'isDefault') {
@@ -187,7 +185,7 @@ export default function ProfilePage() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* ── Sidebar Điều Hướng ── */}
+          {}
           <div className="md:col-span-1 space-y-2">
             <button
               onClick={() => { setActiveTab('profile'); setShowNewAddr(false); }}
@@ -221,11 +219,11 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* ── Nội Dung Tab ── */}
+          {}
           <div className="md:col-span-3">
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                {/* Thông tin tài khoản */}
+                {}
                 <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
                   <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
 
@@ -260,7 +258,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Đổi mật khẩu */}
+                {}
                 <div className="bg-[#FAF5EC] border-2 border-[#2C2114]/80 p-6 shadow-md relative">
                   <div className="absolute inset-1.5 border border-[#8B6508]/10 pointer-events-none" />
 
@@ -350,7 +348,7 @@ export default function ProfilePage() {
                   )}
 
                   {showNewAddr ? (
-                    /* Form thêm/sửa địa chỉ */
+                    
                     <form onSubmit={handleAddOrUpdateAddress} className="grid grid-cols-2 gap-4 relative z-10">
                       <h3 className="col-span-2 text-xs uppercase tracking-wider font-bold text-[#8B6508] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
                         {editingAddrId ? '✍️ Cập Nhật Địa Sở' : '📍 Thiết Lập Địa Sở Mới'}
@@ -418,7 +416,7 @@ export default function ProfilePage() {
                       </div>
                     </form>
                   ) : (
-                    /* Danh sách địa chỉ */
+                    
                     <div className="space-y-4 relative z-10">
                       {addresses.map(addr => (
                         <div

@@ -6,7 +6,6 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import { Spinner, LoadingPage, ErrorBoundary } from './components/common';
 
-// ── Public / User pages ──────────────────────────────────────────────────────
 const HomePage = lazy(() => import('./pages/HomePage'));
 const BooksPage = lazy(() => import('./pages/BooksPage'));
 const BookDetailPage = lazy(() => import('./pages/BookDetailPage'));
@@ -20,7 +19,6 @@ const OrderDetailPage = lazy(() => import('./pages/OrderPages').then(m => ({ def
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ZaloPayReturnPage = lazy(() => import('./pages/ZaloPayReturnPage'));
 
-// ── Admin pages ───────────────────────────────────────────────────────────────
 const AdminRoute = lazy(() => import('./admin/AdminRoute'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./admin/AdminDashboard'));
@@ -48,7 +46,7 @@ function AppLayout() {
         <ErrorBoundary>
           <Suspense fallback={<LoadingPage />}>
             <Routes>
-              {/* ── Public ── */}
+              {}
               <Route path="/" element={<HomePage />} />
               <Route path="/books" element={<BooksPage />} />
               <Route path="/books/:id" element={<BookDetailPage />} />
@@ -58,13 +56,13 @@ function AppLayout() {
               <Route path="/payment/zalopay/return" element={<ZaloPayReturnPage />} />
               <Route path="/auth/callback" element={<OAuth2CallbackPage />} />
 
-              {/* ── Protected User ── */}
+              {}
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
               <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
-              {/* ── 404 ── */}
+              {}
               <Route path="*" element={
                 <div className="text-center py-20">
                   <p className="text-5xl mb-4">404</p>
@@ -115,9 +113,9 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <Routes>
-            {/* Admin section — completely separate layout (no Navbar/Footer) */}
+            {}
             <Route path="/admin/*" element={<AdminApp />} />
-            {/* User section */}
+            {}
             <Route path="/*" element={<AppLayout />} />
           </Routes>
         </CartProvider>

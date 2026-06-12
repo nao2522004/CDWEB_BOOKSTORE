@@ -37,7 +37,6 @@ const NEXT_PAYMENT = {
 const fmt = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 const fmtDate = (d) => d ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(d)) : '—';
 
-//  ORDERS LIST 
 export default function AdminOrders() {
   const [orders, setOrders] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -133,7 +132,6 @@ export default function AdminOrders() {
   );
 }
 
-//  ORDER DETAIL 
 export function AdminOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -196,7 +194,7 @@ export function AdminOrderDetail() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-[#FCFAF6] rounded-xl shadow-xs border border-stone-200/60 my-4">
-      {/* Header Điều Hướng */}
+      {}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#D4C4A8]/40 pb-4">
         <div className="flex items-center gap-3">
           <AdminBtn variant="ghost" size="sm" className="hover:bg-stone-200/60 text-stone-600" onClick={() => navigate('/admin/orders')}>
@@ -213,9 +211,9 @@ export function AdminOrderDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* KHỐI TRÁI: DANH SÁCH VÀ ĐỊA CHỈ KHÁCH HÀNG */}
+        {}
         <div className="lg:col-span-2 space-y-5">
-          {/* Danh Sách Ấn Phẩm */}
+          {}
           <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
             <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-stone-100 flex items-center gap-2"
@@ -241,7 +239,7 @@ export function AdminOrderDetail() {
             </div>
           </div>
 
-          {/* Địa Chỉ Giao Nhận */}
+          {}
           <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
             <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-3 pb-1.5 border-b border-stone-100 flex items-center gap-2"
@@ -268,9 +266,9 @@ export function AdminOrderDetail() {
           </div>
         </div>
 
-        {/* KHỐI PHẢI: BÁO CÁO TÀI CHÍNH + THAO TÁC CẬP NHẬT */}
+        {}
         <div className="space-y-5">
-          {/* Hóa đơn tài chính nhỏ */}
+          {}
           <div className="bg-[#FAF7F2] border border-[#D4C4A8]/80 p-5 relative rounded-lg shadow-2xs">
             <div className="absolute inset-1 border border-[#8B6508]/5 rounded-md pointer-events-none" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-[#D4C4A8]/40 flex items-center gap-2"
@@ -310,7 +308,7 @@ export function AdminOrderDetail() {
             </div>
           </div>
 
-          {/* Vận Hành Quy Trình (Cập Nhật Trạng Thái) */}
+          {}
           <div className="bg-white border border-stone-200/80 p-5 relative rounded-lg shadow-2xs">
             <div className="absolute inset-1 border border-stone-100 rounded-md pointer-events-none" />
             <h2 className="text-[11px] uppercase tracking-wider font-bold text-[#8B6508] mb-4 pb-2 border-b border-stone-100 flex items-center gap-2"
@@ -318,7 +316,7 @@ export function AdminOrderDetail() {
               <span>⚙️</span> ĐIỀU HÀNH ĐƠN HÀNG
             </h2>
 
-            {/* Quy trình Vận đơn */}
+            {}
             <div>
               <p className="text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-2">Quy trình xử lý đơn:</p>
               {nextStatuses.length > 0 ? (
@@ -345,7 +343,7 @@ export function AdminOrderDetail() {
               )}
             </div>
 
-            {/* Quy trình Dòng Tiền */}
+            {}
             {nextPayments.length > 0 && (
               <div className="mt-4 pt-4 border-t border-stone-100">
                 <p className="text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-2">Đối soát dòng tiền:</p>

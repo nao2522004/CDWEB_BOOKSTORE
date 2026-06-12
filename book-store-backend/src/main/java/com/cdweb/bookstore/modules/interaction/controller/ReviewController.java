@@ -18,11 +18,8 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    /**
-     * GET /reviews/book/{bookId}?page=1&size=10
-     * Public — không cần đăng nhập.
-     * Frontend: reviewAPI.getByBook(bookId, { page, size })
-     */
+    
+
     @GetMapping("/book/{bookId}")
     public ResponseEntity<ApiResponse<Page<ReviewDTO>>> getByBook(
             @PathVariable Long bookId,
@@ -31,11 +28,8 @@ public class ReviewController {
         return ApiResponse.ok(reviewService.getByBook(bookId, page, size));
     }
 
-    /**
-     * POST /reviews
-     * Yêu cầu đăng nhập.
-     * Frontend: reviewAPI.create({ bookId, rating, comment })
-     */
+    
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReviewDTO>> create(
@@ -46,11 +40,8 @@ public class ReviewController {
                 "Đăng tải đánh giá thành công");
     }
 
-    /**
-     * PUT /reviews/{id}
-     * Chỉ chủ sở hữu mới được sửa.
-     * Frontend: reviewAPI.update(id, { rating, comment })
-     */
+    
+
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReviewDTO>> update(
@@ -62,11 +53,8 @@ public class ReviewController {
                 "Cập nhật đánh giá thành công");
     }
 
-    /**
-     * DELETE /reviews/{id}
-     * Chỉ chủ sở hữu mới được xóa.
-     * Frontend: reviewAPI.delete(id)
-     */
+    
+
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> delete(
@@ -76,7 +64,7 @@ public class ReviewController {
         return ApiResponse.ok(null, "Xóa đánh giá thành công");
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    
 
     private Long extractUserId(Jwt jwt) {
         Object raw = jwt.getClaim("userId");

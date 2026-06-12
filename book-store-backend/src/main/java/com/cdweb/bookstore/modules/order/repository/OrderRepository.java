@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // ─── User queries ─────────────────────────────────────────────────────────
+    
 
     @Query("""
             SELECT DISTINCT o FROM Order o
@@ -34,11 +34,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """)
     Optional<Order> findByIdWithItems(@Param("orderId") Long orderId);
 
-    // ─── Admin queries (pagination) ───────────────────────────────────────────
+    
 
-    /**
-     * Admin: lấy tất cả đơn hàng có phân trang.
-     */
+    
+
     @Query(value = """
             SELECT DISTINCT o FROM Order o
             LEFT JOIN FETCH o.items oi
@@ -48,9 +47,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """, countQuery = "SELECT COUNT(o) FROM Order o")
     Page<Order> findAllWithItems(Pageable pageable);
 
-    /**
-     * Admin: lọc theo trạng thái + phân trang.
-     */
+    
+
     @Query(value = """
             SELECT DISTINCT o FROM Order o
             LEFT JOIN FETCH o.items oi

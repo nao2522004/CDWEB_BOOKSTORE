@@ -118,7 +118,6 @@ export default function BooksPage() {
     </div>
   );
 
-
   return (
     <div className="bg-[#FAF5EC] min-h-screen text-[#2C2114] selection:bg-[#E6CE9A]/50 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

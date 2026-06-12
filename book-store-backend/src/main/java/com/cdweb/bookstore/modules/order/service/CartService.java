@@ -34,7 +34,7 @@ public class CartService {
         Cart cart = getOrCreateCart(userId);
         Book book = loadActiveBook(request.bookId());
 
-        // Nếu sách đã có trong giỏ → cộng dồn số lượng
+        
         CartItem existingItem = cart.getItems().stream()
                 .filter(i -> i.getBook().getId().equals(book.getId()))
                 .findFirst()
@@ -97,9 +97,8 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    /**
-     * Lấy hoặc tạo mới cart cho user (mỗi user chỉ có 1 cart).
-     */
+    
+
     private Cart getOrCreateCart(Long userId) {
         return cartRepository.findByUserIdWithItems(userId)
                 .orElseGet(() -> {

@@ -76,16 +76,16 @@ export default function CheckoutPage() {
       await clearCart();
 
       if (paymentMethod === 'ZALOPAY') {
-        // Khởi tạo thanh toán ZaloPay → redirect sang cổng thanh toán
+        
         try {
           const payRes = await paymentAPI.zaloPayInit(orderId);
           const orderUrl = payRes?.data?.orderUrl;
           if (orderUrl) {
-            window.location.href = orderUrl; // redirect ra ngoài app
+            window.location.href = orderUrl; 
             return;
           }
         } catch {
-          // Nếu init thất bại, vẫn chuyển về trang đơn hàng để thử lại
+          
         }
         navigate(`/orders/${orderId}`, { state: { success: true, zalopay: true, pendingPayment: true } });
       } else {
@@ -174,7 +174,6 @@ export default function CheckoutPage() {
     }
   };
 
-
   if (!cart?.items?.length) return (
     <div className="bg-[#FAF5EC] min-h-[75vh] flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-[#FAF5EC] border border-[#D4C4A8] p-8 text-center shadow-sm relative">
@@ -207,7 +206,7 @@ export default function CheckoutPage() {
 
           <div className="lg:col-span-2 space-y-6">
 
-            {/* ── Địa chỉ ── */}
+            {}
             <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
               <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
 
@@ -354,7 +353,7 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* ── Phương thức thanh toán ── */}
+            {}
             <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
               <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
               <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#2C2114] mb-4" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -383,7 +382,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* ── Coupon ── */}
+            {}
             <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
               <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
               <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#2C2114] mb-4" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -411,7 +410,7 @@ export default function CheckoutPage() {
               {couponData && <p className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mt-2.5 pl-1" style={{ fontFamily: "'Cinzel', serif" }}>✓ Đã trừ khấu {formatPrice(couponData.discountAmount)}</p>}
             </div>
 
-            {/* ── Ghi chú ── */}
+            {}
             <div className="bg-[#FAF5EC] border border-[#D4C4A8] p-6 shadow-sm relative">
               <div className="absolute inset-1.5 border border-[#8B6508]/5 pointer-events-none" />
               <h2 className="text-xs uppercase tracking-widest font-extrabold text-[#2C2114] mb-3" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -428,7 +427,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* ── Summary ── */}
+          {}
           <div className="lg:col-span-1">
             <div className="bg-[#FAF5EC] border-2 border-[#2C2114]/80 p-6 sticky top-28 shadow-md relative">
               <div className="absolute inset-1.5 border border-[#8B6508]/10 pointer-events-none" />

@@ -15,9 +15,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
     Optional<Coupon> findByCode(String code);
 
-    /**
-     * Tìm coupon theo code với PESSIMISTIC_WRITE lock (SELECT ... FOR UPDATE).
-     */
+    
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Coupon c WHERE c.code = :code")
     Optional<Coupon> findByCodeForUpdate(@Param("code") String code);

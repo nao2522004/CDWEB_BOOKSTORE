@@ -15,12 +15,8 @@ const headers = (isJson = true) => {
   return h;
 };
 
-//  Refresh logic
-// refreshPromise dedup: nếu nhiều request cùng nhận 401 đồng thời,
-// chỉ gọi /auth/refresh 1 lần, tất cả cùng chờ promise đó.
 let refreshPromise = null;
 
-// Callback để AuthContext đăng ký — gọi khi refresh thất bại hoàn toàn
 let onAuthFailure = null;
 export const setAuthFailureHandler = (fn) => {
   onAuthFailure = fn;
@@ -33,7 +29,7 @@ const refreshAccessToken = async () => {
     const res = await fetch(`${BASE_URL}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // gửi HttpOnly cookie refreshToken
+      credentials: "include", 
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -52,7 +48,6 @@ const refreshAccessToken = async () => {
   }
 };
 
-//  Core request
 const AUTH_PATHS = new Set([
   "/auth/login",
   "/auth/register",
@@ -87,20 +82,20 @@ const request = async (
 
   const data = await res.json().catch(() => ({}));
 
-  //  Silent refresh
+  
   if (res.status === 401 && !retried && !AUTH_PATHS.has(path) && getToken()) {
     try {
       await refreshAccessToken();
-      // Retry request gốc với token mới (headers() sẽ tự đọc token mới)
+      
       return request(method, path, body, params, { retried: true, signal });
     } catch (err) {
-      // Refresh thất bại → báo AuthContext logout UI
+      
       onAuthFailure?.();
       throw err;
     }
   }
 
-  //  401 không có token (chưa đăng nhập) → không cần xử lý
+  
   if (res.status === 401 && !getToken()) {
     onAuthFailure?.();
   }
@@ -109,7 +104,6 @@ const request = async (
   return data;
 };
 
-//  Decode JWT
 const decodeJwt = (token) => {
   try {
     const payload = token.split(".")[1];
@@ -135,7 +129,6 @@ const decodeJwt = (token) => {
   }
 };
 
-//  API exports
 export const authAPI = {
   login: (body) => request("POST", "/auth/login", body),
   register: (body) => request("POST", "/auth/register", body),
