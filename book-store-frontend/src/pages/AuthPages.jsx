@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ErrorMsg, Spinner } from '../components/common';
+import { authAPI } from '../api';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -84,6 +85,11 @@ export function LoginPage() {
                 className="w-full bg-transparent border-b-2 border-[#2C2114]/30 focus:border-[#8B6508] pb-1.5 text-sm focus:outline-none placeholder-[#A8967E]/60 font-serif text-[#140E0A] transition-colors"
                 placeholder="••••••••"
               />
+              <div className="flex justify-end mt-2">
+                <Link to="/forgot-password" className="text-stone-500 hover:text-[#8B6508] text-[11px] font-serif italic transition-colors">
+                  Quên mật từ?
+                </Link>
+              </div>
             </div>
 
             {error && <ErrorMsg message={error} />}
@@ -302,6 +308,204 @@ export function OAuth2CallbackPage() {
             </p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+export function ForgotPasswordPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phase, setPhase] = useState(1); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccessMsg('');
+    try {
+      await authAPI.forgotPassword({ email });
+      setSuccessMsg('Mã OTP khôi phục đã được gửi tới email của bạn.');
+      setPhase(2);
+    } catch (err) {
+      setError(err.message || 'Gửi yêu cầu thất bại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError('Mật khẩu xác nhận không trùng khớp.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await authAPI.resetPassword({ email, otpCode, newPassword });
+      navigate('/login', { state: { message: 'Khôi phục mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.' } });
+    } catch (err) {
+      setError(err.message || 'Khôi phục mật khẩu thất bại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-16 bg-[#FAF3E3] selection:bg-[#E6CE9A] relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(#C4B293_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-block text-xl text-[#8B6508] transition-transform duration-500 hover:rotate-180 mb-4">
+            ❖
+          </Link>
+          <span className="text-[#8B6508] text-[10px] tracking-[0.35em] uppercase font-bold block mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+            EX LIBRIS BIBLIOTHECA
+          </span>
+          <h1 className="text-3xl font-serif font-bold text-[#140E0A] tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Khôi Phục Mật Tự
+          </h1>
+          <p className="text-stone-500 text-xs font-serif italic mt-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            Xác minh danh tính độc giả để thiết lập lại mật mã truy cập
+          </p>
+        </div>
+
+        <div className="bg-[#FAF3E3] border border-[#C4B498] shadow-[0_15px_50px_rgba(38,28,18,0.1)] p-8 relative">
+          <div className="absolute inset-2 border border-[#8B6508]/10 pointer-events-none" />
+
+          {successMsg && !error && (
+            <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs uppercase tracking-wider text-center font-bold" style={{ fontFamily: "'Cinzel', serif" }}>
+              {successMsg}
+            </div>
+          )}
+
+          {phase === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-[#2C2114] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                  Nhập địa chỉ Email liên kết
+                </label>
+                <input
+                  type="email"
+                  required
+                  autoFocus
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full bg-transparent border-b-2 border-[#2C2114]/30 focus:border-[#8B6508] pb-1.5 text-sm focus:outline-none placeholder-[#A8967E]/60 font-serif italic text-[#140E0A] transition-colors"
+                  placeholder="reader@bibliotheca.edu"
+                />
+              </div>
+
+              {error && <ErrorMsg message={error} />}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#8B6508] hover:bg-[#A67B1E] text-white font-bold py-3.5 px-4 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-xs shadow-md hover:shadow-lg rounded-[1px]"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {loading ? <><Spinner size="sm" /> Đang gửi yêu cầu...</> : 'Gửi mã xác thực'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleResetPassword} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-[#2C2114] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                  Địa chỉ Email
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={email}
+                  className="w-full bg-transparent border-b-2 border-[#2C2114]/10 pb-1.5 text-sm focus:outline-none font-serif text-[#140E0A]/60 opacity-70"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-[#2C2114] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                  Mã xác thực OTP
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  autoFocus
+                  value={otpCode}
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full bg-transparent border-b-2 border-[#2C2114]/30 focus:border-[#8B6508] pb-1.5 text-sm focus:outline-none placeholder-[#A8967E]/60 tracking-[0.5em] text-center font-bold text-[#140E0A]"
+                  placeholder="000000"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-[#2C2114] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                  Mật từ truy cập mới
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full bg-transparent border-b-2 border-[#2C2114]/30 focus:border-[#8B6508] pb-1.5 text-sm focus:outline-none placeholder-[#A8967E]/60 font-serif text-[#140E0A]"
+                  placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-[#2C2114] mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+                  Xác thực mật từ mới
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="w-full bg-transparent border-b-2 border-[#2C2114]/30 focus:border-[#8B6508] pb-1.5 text-sm focus:outline-none placeholder-[#A8967E]/60 font-serif text-[#140E0A]"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && <ErrorMsg message={error} />}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#8B6508] hover:bg-[#A67B1E] text-white font-bold py-3.5 px-4 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-xs shadow-md hover:shadow-lg rounded-[1px] mt-2"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                {loading ? <><Spinner size="sm" /> Đang cập nhật...</> : 'Cập nhật mật từ'}
+              </button>
+
+              <div className="text-center mt-3">
+                <button
+                  type="button"
+                  onClick={() => { setPhase(1); setError(''); setSuccessMsg(''); }}
+                  className="text-stone-500 hover:text-[#8B6508] text-xs font-serif italic"
+                >
+                  Quay lại bước nhập Email
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="text-center mt-6 pt-6 border-t border-[#C4B498]/40">
+            <p className="text-xs font-serif text-stone-500">
+              Nhớ ra mật từ?{' '}
+              <Link to="/login" className="text-[#8B6508] font-bold hover:text-[#A67B1E] underline underline-offset-4 uppercase tracking-wider ml-1 text-[11px]" style={{ fontFamily: "'Cinzel', serif" }}>
+                Quay lại Đăng nhập
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

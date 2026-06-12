@@ -142,6 +142,8 @@ export const authAPI = {
     return Promise.resolve({ data: user });
   },
   changePassword: (body) => request("PUT", "/auth/change-password", body),
+  forgotPassword: (body) => request("POST", "/auth/forgot-password", body),
+  resetPassword: (body) => request("POST", "/auth/reset-password", body),
 };
 
 export const bookAPI = {
