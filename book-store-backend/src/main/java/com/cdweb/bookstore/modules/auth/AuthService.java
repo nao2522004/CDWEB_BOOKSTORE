@@ -37,56 +37,49 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    
-
     @Transactional
     public LoginResponse login(LoginRequest request, HttpServletResponse response) {
-        
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        
-        User user = userRepository.findByEmailWithRoles(request.email()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Authentication auth = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        
+        User user = userRepository.findByEmailWithRoles(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("Email hoặc mật khẩu không chính xác."));
+
         String accessToken = jwtService.buildAccessToken(auth, user);
 
-        
         String refreshTokenValue = jwtService.createOrRotateRefreshToken(user);
         jwtService.setRefreshTokenCookie(response, refreshTokenValue);
 
-        return new LoginResponse(accessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(), user.getName(), user.getEmail());
+        return new LoginResponse(accessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(),
+                user.getName(), user.getEmail());
     }
-
-    
 
     @Transactional
     public LoginResponse refresh(String cookieToken, HttpServletResponse response) {
-        
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(cookieToken).orElseThrow(() -> new RuntimeException("Refresh token không hợp lệ"));
 
-        
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(cookieToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token không hợp lệ"));
+
         if (refreshToken.isExpired()) {
             refreshTokenRepository.delete(refreshToken);
             jwtService.clearRefreshTokenCookie(response);
             throw new RuntimeException("Refresh token đã hết hạn, vui lòng đăng nhập lại");
         }
 
-        
         User user = refreshToken.getUser();
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(r -> (GrantedAuthority) new SimpleGrantedAuthority(r.getName())).toList();
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(r -> (GrantedAuthority) new SimpleGrantedAuthority(r.getName())).toList();
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 
-        
         String newAccessToken = jwtService.buildAccessToken(auth, user);
 
-        
         String newRefreshToken = jwtService.rotateRefreshToken(refreshToken);
         jwtService.setRefreshTokenCookie(response, newRefreshToken);
 
-        return new LoginResponse(newAccessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(), user.getName(), user.getEmail());
+        return new LoginResponse(newAccessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000,
+                user.getId(), user.getName(), user.getEmail());
     }
-
-    
 
     @Transactional
     public void logout(String cookieToken, HttpServletResponse response) {
@@ -96,12 +89,11 @@ public class AuthService {
         jwtService.clearRefreshTokenCookie(response);
     }
 
-    
-
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email đã được sử dụng");
+            throw new com.cdweb.bookstore.common.exception.ResourceAlreadyExistsException(
+                    "Email này đã được sử dụng bởi một tài khoản khác.");
         }
         User user = User.builder()
                 .name(request.name())
@@ -114,17 +106,16 @@ public class AuthService {
         return RegisterResponse.fromUser(user);
     }
 
-    
-
     @Transactional
     public void changePassword(Long userId, com.cdweb.bookstore.modules.auth.dto.ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        
+                .orElseThrow(() -> new com.cdweb.bookstore.common.exception.ResourceNotFoundException(
+                        "Không tìm thấy thông tin tài khoản người dùng."));
+
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+            throw new RuntimeException("Mật khẩu hiện tại không chính xác.");
         }
-        
+
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
     }

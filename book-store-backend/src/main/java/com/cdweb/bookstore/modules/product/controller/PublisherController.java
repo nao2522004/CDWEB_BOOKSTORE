@@ -2,7 +2,6 @@ package com.cdweb.bookstore.modules.product.controller;
 
 import com.cdweb.bookstore.common.ApiResponse;
 import com.cdweb.bookstore.modules.product.dto.PublisherDTO;
-import com.cdweb.bookstore.modules.product.model.Publisher;
 import com.cdweb.bookstore.modules.product.service.PublisherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,8 +23,7 @@ public class PublisherController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir
-    ) {
+            @RequestParam(defaultValue = "desc") String sortDir) {
         return ApiResponse.ok(publisherService.getAllPublishers(keyword, page, size, sortBy, sortDir));
     }
 

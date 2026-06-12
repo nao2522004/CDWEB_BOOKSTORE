@@ -23,10 +23,10 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
 		String body = """
 				{
-				  "status": 403,
-				  "error": "FORBIDDEN",
+				  "status": "error",
+				  "message": "Bạn không có quyền truy cập tài nguyên này",
 				  "data": null,
-				  "message": "Bạn không có quyền truy cập tài nguyên này"
+				  "errorCode": "FORBIDDEN"
 				}
 				""";
 

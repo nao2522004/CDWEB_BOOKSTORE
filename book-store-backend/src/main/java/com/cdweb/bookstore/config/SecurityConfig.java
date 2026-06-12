@@ -31,6 +31,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final com.cdweb.bookstore.common.exception.CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final com.cdweb.bookstore.common.exception.CustomAccessDeniedHandler customAccessDeniedHandler;
 
     
 
@@ -62,6 +64,10 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler)
+            )
             
             
             .sessionManagement(s -> s

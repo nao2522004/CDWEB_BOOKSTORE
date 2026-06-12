@@ -3,7 +3,6 @@ package com.cdweb.bookstore.modules.product.controller;
 import com.cdweb.bookstore.common.ApiResponse;
 import com.cdweb.bookstore.modules.product.service.AuthorService;
 import com.cdweb.bookstore.modules.product.dto.AuthorDTO;
-import com.cdweb.bookstore.modules.product.model.Author;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +23,7 @@ public class AuthorController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir
-    ) {
+            @RequestParam(defaultValue = "desc") String sortDir) {
         return ApiResponse.ok(authorService.getAllAuthors(keyword, page, size, sortBy, sortDir));
     }
 
@@ -38,10 +36,12 @@ public class AuthorController {
     public ResponseEntity<ApiResponse<AuthorDTO>> getAuthorById(@PathVariable Long id) {
         return ApiResponse.ok(authorService.getAuthorById(id));
     }
+
     @PostMapping
     public ResponseEntity<ApiResponse<AuthorDTO>> createAuthor(@RequestBody AuthorDTO authorDTO) {
         return ApiResponse.created(authorService.createAuthor(authorDTO), "Tạo tác giả thành công");
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AuthorDTO>> updateAuthor(
             @PathVariable Long id,

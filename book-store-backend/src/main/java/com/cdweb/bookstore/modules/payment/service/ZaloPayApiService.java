@@ -27,10 +27,6 @@ public class ZaloPayApiService {
     private final ZaloPayProperties zaloPayProperties;
     private final RestTemplate restTemplate;
 
-    
-
-    
-
     public String hmacSha256(String key, String data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -48,19 +44,11 @@ public class ZaloPayApiService {
         }
     }
 
-    
-
-    
-
     public String buildAppTransId(Long orderId) {
         String date = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
                 .format(DateTimeFormatter.ofPattern("yyMMdd"));
         return date + "_" + orderId + "_" + System.currentTimeMillis();
     }
-
-    
-
-    
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> createOrder(String appTransId, String appUser,
@@ -69,17 +57,14 @@ public class ZaloPayApiService {
             int appId = zaloPayProperties.getAppId();
             long appTime = System.currentTimeMillis();
 
-            
             String redirectUrl = zaloPayProperties.getClientUrl() + "/payment/zalopay/return";
             String embedData = "{\"orderId\":" + orderId + ",\"redirecturl\":\"" + redirectUrl + "\"}";
             String item = "[]";
 
-            
             String hmacInput = appId + "|" + appTransId + "|" + appUser + "|"
                     + amount + "|" + appTime + "|" + embedData + "|" + item;
             String mac = hmacSha256(zaloPayProperties.getMacKey(), hmacInput);
 
-            
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("app_id", String.valueOf(appId));
             body.add("app_user", appUser);
@@ -92,7 +77,6 @@ public class ZaloPayApiService {
             body.add("item", item);
             body.add("mac", mac);
 
-            
             if (zaloPayProperties.getServerUrl() != null) {
                 String callbackUrl = zaloPayProperties.getServerUrl() + "/payment/zalopay/callback";
                 body.add("callback_url", callbackUrl);
@@ -114,16 +98,11 @@ public class ZaloPayApiService {
         }
     }
 
-    
-
-    
-
     @SuppressWarnings("unchecked")
     public Map<String, Object> queryOrder(String appTransId) {
         try {
             int appId = zaloPayProperties.getAppId();
 
-            
             String hmacInput = appId + "|" + appTransId + "|" + zaloPayProperties.getMacKey();
             String mac = hmacSha256(zaloPayProperties.getMacKey(), hmacInput);
 
@@ -147,10 +126,6 @@ public class ZaloPayApiService {
             throw new RuntimeException("Không thể truy vấn trạng thái ZaloPay: " + e.getMessage());
         }
     }
-
-    
-
-    
 
     public boolean verifyCallback(String data, String mac) {
         String expectedMac = hmacSha256(zaloPayProperties.getMacKey(), data);

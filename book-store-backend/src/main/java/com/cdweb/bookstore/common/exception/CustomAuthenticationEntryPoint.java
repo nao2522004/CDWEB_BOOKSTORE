@@ -23,10 +23,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
 		String body = """
 				{
-				  "status": 401,
-				  "errorCode": "UNAUTHORIZED",
+				  "status": "error",
+				  "message": "Bạn cần đăng nhập hoặc token không hợp lệ",
 				  "data": null,
-				  "message": "Bạn cần đăng nhập hoặc token không hợp lệ"
+				  "errorCode": "AUTH_UNAUTHORIZED"
 				}
 				""";
 
