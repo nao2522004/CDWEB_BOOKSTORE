@@ -14,6 +14,7 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const LoginPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.RegisterPage })));
 const OAuth2CallbackPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.OAuth2CallbackPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/AuthPages').then(m => ({ default: m.ForgotPasswordPage })));
 const OrdersPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrdersPage })));
 const OrderDetailPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrderDetailPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -55,6 +56,7 @@ function AppLayout() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/payment/zalopay/return" element={<ZaloPayReturnPage />} />
               <Route path="/auth/callback" element={<OAuth2CallbackPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
               {}
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
