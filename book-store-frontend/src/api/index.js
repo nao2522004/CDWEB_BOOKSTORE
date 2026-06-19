@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "/api";
 
 const getToken = () => localStorage.getItem("accessToken");
 
@@ -210,6 +210,9 @@ export const adminAPI = {
     create: (body) => request("POST", "/admin/coupons", body),
     update: (id, body) => request("PUT", `/admin/coupons/${id}`, body),
     delete: (id) => request("DELETE", `/admin/coupons/${id}`),
+  },
+  dashboard: {
+    getStatistics: () => request("GET", "/admin/dashboard/statistics"),
   },
 };
 

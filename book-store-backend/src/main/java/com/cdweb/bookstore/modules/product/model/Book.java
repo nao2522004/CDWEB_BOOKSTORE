@@ -65,8 +65,6 @@ public class Book {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "book_authors", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     @Builder.Default
@@ -83,16 +81,14 @@ public class Book {
 
     @PrePersist
     void prePersist() {
-        this.createdAt = Instant.now();
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
     }
-
-    
 
     public String getCoverUrl() {
         return images.stream().filter(BookImage::isCover).map(BookImage::getImageUrl).findFirst().orElse(images.isEmpty() ? null : images.get(0).getImageUrl());
     }
-
-    
 
     public BigDecimal getEffectivePrice() {
         return discountPrice != null ? discountPrice : price;

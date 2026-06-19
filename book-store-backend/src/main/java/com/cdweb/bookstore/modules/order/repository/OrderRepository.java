@@ -14,8 +14,6 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    
-
     @Query("""
             SELECT DISTINCT o FROM Order o
             LEFT JOIN FETCH o.items oi
@@ -34,10 +32,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """)
     Optional<Order> findByIdWithItems(@Param("orderId") Long orderId);
 
-    
-
-    
-
     @Query(value = """
             SELECT DISTINCT o FROM Order o
             LEFT JOIN FETCH o.items oi
@@ -47,8 +41,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """, countQuery = "SELECT COUNT(o) FROM Order o")
     Page<Order> findAllWithItems(Pageable pageable);
 
-    
-
     @Query(value = """
             SELECT DISTINCT o FROM Order o
             LEFT JOIN FETCH o.items oi
@@ -57,4 +49,19 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             WHERE o.status = :status
             """, countQuery = "SELECT COUNT(o) FROM Order o WHERE o.status = :status")
     Page<Order> findAllByStatusWithItems(@Param("status") Order.OrderStatus status, Pageable pageable);
+
+    @Query(value = "SELECT COALESCE(SUM(o.total_amount), 0) FROM orders o WHERE o.status = 'DELIVERED'", nativeQuery = true)
+    java.math.BigDecimal calculateTotalRevenue();
+
+    @Query(value = "SELECT o.status as status, COUNT(o.id) as count FROM orders o GROUP BY o.status", nativeQuery = true)
+    List<Object[]> countOrdersByStatus();
+
+    @Query(value = "SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS month, " +
+                   "SUM(o.total_amount) AS revenue, " +
+                   "COUNT(o.id) AS orderCount " +
+                   "FROM orders o " +
+                   "WHERE o.status = 'DELIVERED' " +
+                   "GROUP BY DATE_FORMAT(o.created_at, '%Y-%m') " +
+                   "ORDER BY month DESC LIMIT 6", nativeQuery = true)
+    List<com.cdweb.bookstore.modules.order.dto.MonthlyRevenueProjection> getMonthlyRevenueForLast6Months();
 }

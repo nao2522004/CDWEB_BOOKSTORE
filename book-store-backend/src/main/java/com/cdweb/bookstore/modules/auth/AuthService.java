@@ -13,6 +13,7 @@ import com.cdweb.bookstore.modules.user.repository.RefreshTokenRepository;
 import com.cdweb.bookstore.modules.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final JwtProperties jwtProperties;
@@ -41,6 +43,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request, HttpServletResponse response) {
+        log.info("Yêu cầu đăng nhập nhận được cho email: {}", request.email());
 
         Authentication auth = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
@@ -49,9 +52,10 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email hoặc mật khẩu không chính xác."));
 
         String accessToken = jwtService.buildAccessToken(auth, user);
-
         String refreshTokenValue = jwtService.createOrRotateRefreshToken(user);
         jwtService.setRefreshTokenCookie(response, refreshTokenValue);
+
+        log.info("Đăng nhập thành công cho user ID: {}. Đã tạo Access Token và lưu Refresh Token vào Cookie.", user.getId());
 
         return new LoginResponse(accessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000, user.getId(),
                 user.getName(), user.getEmail());
@@ -59,11 +63,16 @@ public class AuthService {
 
     @Transactional
     public LoginResponse refresh(String cookieToken, HttpServletResponse response) {
+        log.info("Yêu cầu làm mới Access Token nhận được bằng Refresh Token.");
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(cookieToken)
-                .orElseThrow(() -> new RuntimeException("Refresh token không hợp lệ"));
+                .orElseThrow(() -> {
+                    log.error("Refresh token không tồn tại trong cơ sở dữ liệu.");
+                    return new RuntimeException("Refresh token không hợp lệ");
+                });
 
         if (refreshToken.isExpired()) {
+            log.warn("Refresh token của User ID: {} đã hết hạn.", refreshToken.getUser().getId());
             refreshTokenRepository.delete(refreshToken);
             jwtService.clearRefreshTokenCookie(response);
             throw new RuntimeException("Refresh token đã hết hạn, vui lòng đăng nhập lại");
@@ -75,9 +84,10 @@ public class AuthService {
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 
         String newAccessToken = jwtService.buildAccessToken(auth, user);
-
         String newRefreshToken = jwtService.rotateRefreshToken(refreshToken);
         jwtService.setRefreshTokenCookie(response, newRefreshToken);
+
+        log.info("Làm mới Access Token thành công cho User ID: {}. Đã xoay vòng (rotate) Refresh Token mới.", user.getId());
 
         return new LoginResponse(newAccessToken, "Bearer", jwtProperties.getAccessTokenExpiration() / 1000,
                 user.getId(), user.getName(), user.getEmail());

@@ -58,7 +58,6 @@ public class Order {
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
 
-    
     @Column(name = "recipient_name")
     private String recipientName;
 
@@ -79,7 +78,9 @@ public class Order {
 
     @PrePersist
     void prePersist() {
-        this.createdAt = Instant.now();
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
     }
 
     public enum OrderStatus {
