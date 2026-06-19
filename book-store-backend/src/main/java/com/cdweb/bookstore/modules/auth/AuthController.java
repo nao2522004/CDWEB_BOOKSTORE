@@ -8,6 +8,7 @@ import com.cdweb.bookstore.modules.auth.dto.RegisterResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -19,6 +20,7 @@ import com.cdweb.bookstore.modules.auth.dto.ResetPasswordRequest;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 // @formatter:off
 public class AuthController {
 
@@ -40,8 +42,10 @@ public class AuthController {
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response) {
         if (refreshToken == null || refreshToken.isBlank()) {
+            log.warn("Yêu cầu /auth/refresh bị từ chối: Không tìm thấy cookie 'refreshToken' trong request.");
             return ApiResponse.unauthorized("Phiên làm việc hết hạn, vui lòng đăng nhập lại");
         }
+        log.info("Yêu cầu /auth/refresh hợp lệ: Đã nhận được cookie 'refreshToken'. Tiến hành làm mới token...");
         LoginResponse data = authService.refresh(refreshToken, response);
         return ApiResponse.ok(data, "Lấy Access Token mới thành công");
     }
