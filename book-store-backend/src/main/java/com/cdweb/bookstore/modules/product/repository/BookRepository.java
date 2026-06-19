@@ -36,13 +36,14 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity + :qty WHERE b.id = :id")
     void increaseStock(@Param("id") Long id, @Param("qty") int qty);
 
-    @Query(value = "SELECT oi.book_id as bookId, b.title as title, b.cover_url as coverUrl, " +
+    @Query(value = "SELECT oi.book_id as bookId, b.title as title, bi.image_url as coverUrl, " +
                    "SUM(oi.quantity) as totalSoldQuantity " +
                    "FROM order_items oi " +
                    "JOIN books b ON oi.book_id = b.id " +
+                   "LEFT JOIN book_images bi ON b.id = bi.book_id AND bi.is_cover = true " +
                    "JOIN orders o ON oi.order_id = o.id " +
                    "WHERE o.status = 'DELIVERED' " +
-                   "GROUP BY oi.book_id, b.title, b.cover_url " +
+                   "GROUP BY oi.book_id, b.title, bi.image_url " +
                    "ORDER BY totalSoldQuantity DESC LIMIT 5", nativeQuery = true)
     java.util.List<com.cdweb.bookstore.modules.order.dto.TopBookProjection> getTopSellingBooks();
 }
