@@ -211,6 +211,9 @@ export const adminAPI = {
     update: (id, body) => request("PUT", `/admin/coupons/${id}`, body),
     delete: (id) => request("DELETE", `/admin/coupons/${id}`),
   },
+  dashboard: {
+    getStatistics: () => request("GET", "/admin/dashboard/statistics"),
+  },
 };
 
 export const cartAPI = {
