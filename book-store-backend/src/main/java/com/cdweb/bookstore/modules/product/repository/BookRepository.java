@@ -26,16 +26,23 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             "OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.slug) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Book> searchBooks(@Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
-    
 
     @Modifying
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity - :qty " +
             "WHERE b.id = :id AND b.stockQuantity >= :qty")
     int decreaseStock(@Param("id") Long id, @Param("qty") int qty);
 
-    
-
     @Modifying
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity + :qty WHERE b.id = :id")
     void increaseStock(@Param("id") Long id, @Param("qty") int qty);
+
+    @Query(value = "SELECT oi.book_id as bookId, b.title as title, b.cover_url as coverUrl, " +
+                   "SUM(oi.quantity) as totalSoldQuantity " +
+                   "FROM order_items oi " +
+                   "JOIN books b ON oi.book_id = b.id " +
+                   "JOIN orders o ON oi.order_id = o.id " +
+                   "WHERE o.status = 'DELIVERED' " +
+                   "GROUP BY oi.book_id, b.title, b.cover_url " +
+                   "ORDER BY totalSoldQuantity DESC LIMIT 5", nativeQuery = true)
+    java.util.List<com.cdweb.bookstore.modules.order.dto.TopBookProjection> getTopSellingBooks();
 }
