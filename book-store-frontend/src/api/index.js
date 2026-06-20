@@ -256,3 +256,14 @@ export const reviewAPI = {
   update: (id, body) => request("PUT", `/reviews/${id}`, body),
   delete: (id) => request("DELETE", `/reviews/${id}`),
 };
+
+export const commentAPI = {
+  getByBook: (bookId, params) =>
+    request("GET", `/comments/book/${bookId}`, null, params),
+  create: (body) => request("POST", "/comments", body),
+  update: (id, content) => request("PUT", `/comments/${id}`, { content }),
+  delete: (id) => request("DELETE", `/comments/${id}`),
+  countByBook: (bookId) =>
+    request("GET", `/comments/book/${bookId}/count`),
+};
+

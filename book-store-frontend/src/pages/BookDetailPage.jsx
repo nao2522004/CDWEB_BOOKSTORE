@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { bookAPI, reviewAPI } from '../api';
+import { bookAPI, reviewAPI, commentAPI } from '../api';
+import { CommentSection } from '../components/comment';
 import { useCart } from '../context/CartContext';
 import { formatPrice, formatDate, getDiscountPercent, PLACEHOLDER_BOOK } from '../utils';
 import { Spinner, StarRating, Empty, ErrorMsg } from '../components/common';
@@ -16,6 +17,7 @@ export default function BookDetailPage() {
   const [added, setAdded] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('desc');
+  const [commentCount, setCommentCount] = useState(0);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,12 +25,14 @@ export default function BookDetailPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [bookRes, revRes] = await Promise.all([
+        const [bookRes, revRes, commentCountRes] = await Promise.all([
           bookAPI.getById(id),
           reviewAPI.getByBook(id, { page: 1, size: 10 }).catch(() => null),
+          commentAPI.countByBook(id).catch(() => ({ data: 0 })),
         ]);
         setBook(bookRes.data);
         setReviews(revRes?.data);
+        setCommentCount(commentCountRes?.data || 0);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -232,6 +236,7 @@ export default function BookDetailPage() {
             {[
               { key: 'desc', label: 'Tóm lược tác phẩm' },
               { key: 'reviews', label: `Học giả bình nghị (${reviews?.totalElements || 0})` },
+              { key: 'comments', label: `Luận đàm thảo luận (${commentCount})` },
             ].map(tab => (
               <button
                 key={tab.key}
@@ -316,6 +321,10 @@ export default function BookDetailPage() {
                   </div>
                 )}
               </div>
+            )}
+
+            {activeTab === 'comments' && (
+              <CommentSection bookId={Number(id)} onCountChange={setCommentCount} />
             )}
           </div>
         </div>
