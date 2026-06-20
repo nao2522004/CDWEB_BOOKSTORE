@@ -79,7 +79,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/books/**", "/categories/**",
-                        "/authors/**", "/publishers/**").permitAll()
+                        "/authors/**", "/publishers/**", "/comments/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/books/**", "/categories/**",
                         "/authors/**", "/publishers/**").permitAll()
 
