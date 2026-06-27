@@ -3,6 +3,7 @@ package com.cdweb.bookstore.modules.product.controller;
 import com.cdweb.bookstore.common.ApiResponse;
 import com.cdweb.bookstore.modules.product.dto.AuthorDTO;
 import com.cdweb.bookstore.modules.product.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,14 +30,14 @@ public class AdminAuthorController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AuthorDTO>> createAuthor(@RequestBody AuthorDTO dto) {
+    public ResponseEntity<ApiResponse<AuthorDTO>> createAuthor(@Valid @RequestBody AuthorDTO dto) {
         return ApiResponse.created(authorService.createAuthor(dto), "Tạo tác giả thành công");
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<AuthorDTO>> updateAuthor(
             @PathVariable Long id,
-            @RequestBody AuthorDTO dto) {
+            @Valid @RequestBody AuthorDTO dto) {
         return ApiResponse.ok(authorService.updateAuthor(id, dto), "Cập nhật tác giả thành công");
     }
 

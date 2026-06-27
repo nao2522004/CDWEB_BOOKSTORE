@@ -3,6 +3,7 @@ package com.cdweb.bookstore.modules.product.controller;
 import com.cdweb.bookstore.common.ApiResponse;
 import com.cdweb.bookstore.modules.product.dto.CategoryDTO;
 import com.cdweb.bookstore.modules.product.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,14 +18,14 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody CategoryDTO dto) {
+    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@Valid @RequestBody CategoryDTO dto) {
         return ApiResponse.created(categoryService.createCategory(dto), "Tạo danh mục thành công");
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(
             @PathVariable Long id,
-            @RequestBody CategoryDTO dto) {
+            @Valid @RequestBody CategoryDTO dto) {
         return ApiResponse.ok(categoryService.updateCategory(id, dto), "Cập nhật danh mục thành công");
     }
 
