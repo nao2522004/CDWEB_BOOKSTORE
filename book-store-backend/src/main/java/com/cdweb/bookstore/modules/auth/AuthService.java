@@ -80,7 +80,7 @@ public class AuthService {
 
         User user = refreshToken.getUser();
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(r -> (GrantedAuthority) new SimpleGrantedAuthority(r.getName())).toList();
+                .map(r -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + r.getName())).toList();
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 
         String newAccessToken = jwtService.buildAccessToken(auth, user);
