@@ -93,13 +93,43 @@ export default function AdminBooks() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const priceNum = parseFloat(form.price);
+    const discountNum = form.discountPrice ? parseFloat(form.discountPrice) : null;
+    const stockNum = parseInt(form.stockQuantity);
+
+    if (isNaN(priceNum) || priceNum < 0) {
+      toast('Giá bán phải lớn hơn hoặc bằng 0', 'error');
+      return;
+    }
+    if (discountNum !== null && (isNaN(discountNum) || discountNum < 0)) {
+      toast('Giá khuyến mãi phải lớn hơn hoặc bằng 0', 'error');
+      return;
+    }
+    if (discountNum !== null && discountNum > priceNum) {
+      toast('Giá khuyến mãi không được lớn hơn giá bán gốc', 'error');
+      return;
+    }
+    if (isNaN(stockNum) || stockNum < 0) {
+      toast('Số lượng kho phải lớn hơn hoặc bằng 0', 'error');
+      return;
+    }
+    if (!form.categoryId) {
+      toast('Vui lòng chọn danh mục', 'error');
+      return;
+    }
+    if (!form.publisherId) {
+      toast('Vui lòng chọn nhà xuất bản', 'error');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
         ...form,
-        price: parseFloat(form.price) || 0,
-        discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
-        stockQuantity: parseInt(form.stockQuantity) || 0,
+        price: priceNum,
+        discountPrice: discountNum,
+        stockQuantity: stockNum,
         pages: form.pages ? parseInt(form.pages) : null,
         categoryId: form.categoryId ? parseInt(form.categoryId) : null,
         publisherId: form.publisherId ? parseInt(form.publisherId) : null,

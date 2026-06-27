@@ -37,6 +37,9 @@ public class BookService {
         if (bookRepository.existsBySlug(dto.getSlug())) {
             throw new RuntimeException("Slug đã tồn tại: " + dto.getSlug());
         }
+        if (dto.getDiscountPrice() != null && dto.getPrice() != null && dto.getDiscountPrice().compareTo(dto.getPrice()) > 0) {
+            throw new RuntimeException("Giá khuyến mãi không được lớn hơn giá gốc.");
+        }
 
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(
@@ -128,14 +131,21 @@ public class BookService {
     }
 
     private void setDtoToEntity(BookDTO dto, Book book) {
-        if (dto.getTitle() != null)
-            book.setTitle(dto.getTitle());
-        if (dto.getDescription() != null)
-            book.setDescription(dto.getDescription());
         if (dto.getPrice() != null)
             book.setPrice(dto.getPrice());
         if (dto.getDiscountPrice() != null)
             book.setDiscountPrice(dto.getDiscountPrice());
+
+        java.math.BigDecimal finalPrice = book.getPrice();
+        java.math.BigDecimal finalDiscount = book.getDiscountPrice();
+        if (finalDiscount != null && finalPrice != null && finalDiscount.compareTo(finalPrice) > 0) {
+            throw new RuntimeException("Giá khuyến mãi không được lớn hơn giá gốc.");
+        }
+
+        if (dto.getTitle() != null)
+            book.setTitle(dto.getTitle());
+        if (dto.getDescription() != null)
+            book.setDescription(dto.getDescription());
         if (dto.getStockQuantity() != null)
             book.setStockQuantity(dto.getStockQuantity());
         if (dto.getPages() != null)
