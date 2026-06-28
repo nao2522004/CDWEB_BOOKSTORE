@@ -1,0 +1,294 @@
+const BASE_URL = "/api";
+
+const getToken = () => localStorage.getItem("accessToken");
+
+const setToken = (token) => {
+  if (token) localStorage.setItem("accessToken", token);
+  else localStorage.removeItem("accessToken");
+};
+
+const headers = (isJson = true) => {
+  const h = {};
+  if (isJson) h["Content-Type"] = "application/json";
+  const token = getToken();
+  if (token) h["Authorization"] = `Bearer ${token}`;
+  return h;
+};
+
+let refreshPromise = null;
+
+let onAuthFailure = null;
+export const setAuthFailureHandler = (fn) => {
+  onAuthFailure = fn;
+};
+
+const refreshAccessToken = async () => {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", 
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setToken(null);
+      throw new Error(data?.message || "Phiên đăng nhập đã hết hạn");
+    }
+    const token = data?.data?.accessToken;
+    if (token) setToken(token);
+    return token;
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
+};
+
+const AUTH_PATHS = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+]);
+
+const request = async (
+  method,
+  path,
+  body = null,
+  params = null,
+  { retried = false, signal } = {},
+) => {
+  let url = `${BASE_URL}${path}`;
+  if (params) {
+    const q = new URLSearchParams(
+      Object.entries(params).filter(
+        ([, v]) => v !== undefined && v !== null && v !== "",
+      ),
+    );
+    if ([...q].length) url += `?${q}`;
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers: headers(),
+    body: body ? JSON.stringify(body) : undefined,
+    credentials: "include",
+    signal,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  
+  if (res.status === 401 && !retried && !AUTH_PATHS.has(path) && getToken()) {
+    try {
+      await refreshAccessToken();
+      
+      return request(method, path, body, params, { retried: true, signal });
+    } catch (err) {
+      
+      onAuthFailure?.();
+      throw err;
+    }
+  }
+
+  
+  if (res.status === 401 && !getToken()) {
+    onAuthFailure?.();
+  }
+
+  if (!res.ok) throw new Error(data.message || "Request failed");
+  return data;
+};
+
+const decodeJwt = (token) => {
+  try {
+    const payload = token.split(".")[1];
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+    const claims = JSON.parse(json);
+    const roles = (claims.roles || []).map((r) =>
+      r.startsWith("ROLE_") ? r : `ROLE_${r}`,
+    );
+    return {
+      id: claims.userId,
+      email: claims.sub,
+      name: claims.name || claims.sub,
+      roles,
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const authAPI = {
+  login: (body) => request("POST", "/auth/login", body),
+  register: (body) => request("POST", "/auth/register", body),
+  refresh: () => request("POST", "/auth/refresh"),
+  logout: () => request("POST", "/auth/logout"),
+  me: () => {
+    const token = getToken();
+    if (!token) return Promise.reject(new Error("No token"));
+    const user = decodeJwt(token);
+    if (!user) return Promise.reject(new Error("Invalid token"));
+    return Promise.resolve({ data: user });
+  },
+  changePassword: (body) => request("PUT", "/auth/change-password", body),
+  forgotPassword: (body) => request("POST", "/auth/forgot-password", body),
+  resetPassword: (body) => request("POST", "/auth/reset-password", body),
+};
+
+export const bookAPI = {
+  getAll: (params, options) => request("GET", "/books", null, params, options),
+  getById: (id, options) => request("GET", `/books/${id}`, null, null, options),
+};
+
+export const categoryAPI = {
+  getAll: (params, options) =>
+    request("GET", "/categories", null, params, options),
+  getAllList: (options) => request("GET", "/categories/all", null, null, options),
+  getById: (id, options) =>
+    request("GET", `/categories/${id}`, null, null, options),
+};
+
+export const authorAPI = {
+  getAll: (params, options) =>
+    request("GET", "/authors", null, params, options),
+  getAllList: (options) => request("GET", "/authors/all", null, null, options),
+  getById: (id, options) =>
+    request("GET", `/authors/${id}`, null, null, options),
+};
+
+export const publisherAPI = {
+  getAll: (params, options) =>
+    request("GET", "/publishers", null, params, options),
+  getAllList: (options) => request("GET", "/publishers/all", null, null, options),
+  getById: (id, options) =>
+    request("GET", `/publishers/${id}`, null, null, options),
+};
+
+export const adminAPI = {
+  books: {
+    create: (body) => request("POST", "/admin/books", body),
+    update: (id, body) => request("PUT", `/admin/books/${id}`, body),
+    delete: (id) => request("DELETE", `/admin/books/${id}`),
+  },
+  categories: {
+    create: (body) => request("POST", "/admin/categories", body),
+    update: (id, body) => request("PUT", `/admin/categories/${id}`, body),
+    delete: (id) => request("DELETE", `/admin/categories/${id}`),
+  },
+  authors: {
+    create: (body) => request("POST", "/admin/authors", body),
+    update: (id, body) => request("PUT", `/admin/authors/${id}`, body),
+    delete: (id) => request("DELETE", `/admin/authors/${id}`),
+  },
+  publishers: {
+    create: (body) => request("POST", "/admin/publishers", body),
+    update: (id, body) => request("PUT", `/admin/publishers/${id}`, body),
+    delete: (id) => request("DELETE", `/admin/publishers/${id}`),
+  },
+  orders: {
+    getAll: (params) => request("GET", "/admin/orders", null, params),
+    getById: (id) => request("GET", `/admin/orders/${id}`),
+    updateStatus: (id, status) =>
+      request("PATCH", `/admin/orders/${id}/status`, null, { status }),
+    updatePayment: (id, paymentStatus) =>
+      request("PATCH", `/admin/orders/${id}/payment`, { paymentStatus }),
+  },
+  coupons: {
+    getAll: () => request("GET", "/admin/coupons"),
+    getById: (id) => request("GET", `/admin/coupons/${id}`),
+    create: (body) => request("POST", "/admin/coupons", body),
+    update: (id, body) => request("PUT", `/admin/coupons/${id}`, body),
+    delete: (id) => request("DELETE", `/admin/coupons/${id}`),
+  },
+  dashboard: {
+    getStatistics: () => request("GET", "/admin/dashboard/statistics"),
+  },
+};
+
+export const cartAPI = {
+  get: () => request("GET", "/cart"),
+  addItem: (body) => request("POST", "/cart/items", body),
+  updateItem: (bookId, body) => request("PUT", `/cart/items/${bookId}`, body),
+  removeItem: (bookId) => request("DELETE", `/cart/items/${bookId}`),
+  clear: () => request("DELETE", "/cart"),
+};
+
+export const orderAPI = {
+  create: (body) => request("POST", "/orders/checkout", body),
+  getMyOrders: (params) => request("GET", "/orders", null, params),
+  getById: (id) => request("GET", `/orders/${id}`),
+  cancel: (id) => request("PATCH", `/orders/${id}/cancel`),
+};
+
+export const paymentAPI = {
+  zaloPayInit: (orderId) => request("POST", `/payment/zalopay/init/${orderId}`),
+  zaloPayStatus: (orderId) => request("GET", `/payment/zalopay/status/${orderId}`),
+};
+
+export const couponAPI = {
+  validate: (code, subtotal) =>
+    request("GET", "/coupons/preview", null, { code, subtotal }),
+};
+
+export const addressAPI = {
+  getAll: () => request("GET", "/addresses"),
+  create: (body) => request("POST", "/addresses", body),
+  update: (id, body) => request("PUT", `/addresses/${id}`, body),
+  delete: (id) => request("DELETE", `/addresses/${id}`),
+  setDefault: (id) => request("PATCH", `/addresses/${id}/default`),
+};
+
+export const reviewAPI = {
+  getByBook: (bookId, params) =>
+    request("GET", `/reviews/book/${bookId}`, null, params),
+  create: (body) => request("POST", "/reviews", body),
+  update: (id, body) => request("PUT", `/reviews/${id}`, body),
+  delete: (id) => request("DELETE", `/reviews/${id}`),
+};
+
+export const commentAPI = {
+  getByBook: (bookId, params) =>
+    request("GET", `/comments/book/${bookId}`, null, params),
+  create: (body) => request("POST", "/comments", body),
+  update: (id, content) => request("PUT", `/comments/${id}`, { content }),
+  delete: (id) => request("DELETE", `/comments/${id}`),
+  countByBook: (bookId) =>
+    request("GET", `/comments/book/${bookId}/count`),
+};
+
+export const wishlistAPI = {
+  /** GET /wishlists — Danh sách yêu thích có phân trang */
+  getAll: (params, options) =>
+    request("GET", "/wishlists", null, params, options),
+
+  /** POST /wishlists/{bookId} — Thêm vào wishlist */
+  add: (bookId, options) =>
+    request("POST", `/wishlists/${bookId}`, null, null, options),
+
+  /** DELETE /wishlists/{bookId} — Xóa khỏi wishlist */
+  remove: (bookId, options) =>
+    request("DELETE", `/wishlists/${bookId}`, null, null, options),
+
+  /** POST /wishlists/{bookId}/toggle — Toggle thêm/xóa */
+  toggle: (bookId, options) =>
+    request("POST", `/wishlists/${bookId}/toggle`, null, null, options),
+
+  /** GET /wishlists/{bookId}/check — Kiểm tra sách có trong wishlist */
+  check: (bookId, options) =>
+    request("GET", `/wishlists/${bookId}/check`, null, null, options),
+
+  /** GET /wishlists/count — Đếm tổng số sách */
+  count: (options) =>
+    request("GET", "/wishlists/count", null, null, options),
+};
