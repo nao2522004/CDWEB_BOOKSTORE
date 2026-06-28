@@ -267,3 +267,28 @@ export const commentAPI = {
     request("GET", `/comments/book/${bookId}/count`),
 };
 
+export const wishlistAPI = {
+  /** GET /wishlists — Danh sách yêu thích có phân trang */
+  getAll: (params, options) =>
+    request("GET", "/wishlists", null, params, options),
+
+  /** POST /wishlists/{bookId} — Thêm vào wishlist */
+  add: (bookId, options) =>
+    request("POST", `/wishlists/${bookId}`, null, null, options),
+
+  /** DELETE /wishlists/{bookId} — Xóa khỏi wishlist */
+  remove: (bookId, options) =>
+    request("DELETE", `/wishlists/${bookId}`, null, null, options),
+
+  /** POST /wishlists/{bookId}/toggle — Toggle thêm/xóa */
+  toggle: (bookId, options) =>
+    request("POST", `/wishlists/${bookId}/toggle`, null, null, options),
+
+  /** GET /wishlists/{bookId}/check — Kiểm tra sách có trong wishlist */
+  check: (bookId, options) =>
+    request("GET", `/wishlists/${bookId}/check`, null, null, options),
+
+  /** GET /wishlists/count — Đếm tổng số sách */
+  count: (options) =>
+    request("GET", "/wishlists/count", null, null, options),
+};
