@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import { Spinner, LoadingPage, ErrorBoundary } from './components/common';
@@ -19,7 +20,7 @@ const OrdersPage = lazy(() => import('./pages/OrderPages').then(m => ({ default:
 const OrderDetailPage = lazy(() => import('./pages/OrderPages').then(m => ({ default: m.OrderDetailPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ZaloPayReturnPage = lazy(() => import('./pages/ZaloPayReturnPage'));
-
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const AdminRoute = lazy(() => import('./admin/AdminRoute'));
 const AdminLayout = lazy(() => import('./admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./admin/AdminDashboard'));
@@ -47,7 +48,7 @@ function AppLayout() {
         <ErrorBoundary>
           <Suspense fallback={<LoadingPage />}>
             <Routes>
-              {}
+              { }
               <Route path="/" element={<HomePage />} />
               <Route path="/books" element={<BooksPage />} />
               <Route path="/books/:id" element={<BookDetailPage />} />
@@ -57,14 +58,14 @@ function AppLayout() {
               <Route path="/payment/zalopay/return" element={<ZaloPayReturnPage />} />
               <Route path="/auth/callback" element={<OAuth2CallbackPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
-              {}
+              <Route path="/profile/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+              { }
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
               <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
-              {}
+              { }
               <Route path="*" element={
                 <div className="text-center py-20">
                   <p className="text-5xl mb-4">404</p>
@@ -114,12 +115,14 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            {}
-            <Route path="/admin/*" element={<AdminApp />} />
-            {}
-            <Route path="/*" element={<AppLayout />} />
-          </Routes>
+          <WishlistProvider>
+            <Routes>
+              { }
+              <Route path="/admin/*" element={<AdminApp />} />
+              { }
+              <Route path="/*" element={<AppLayout />} />
+            </Routes>
+          </WishlistProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

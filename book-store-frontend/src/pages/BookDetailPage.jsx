@@ -3,12 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import { bookAPI, reviewAPI, commentAPI } from '../api';
 import { CommentSection } from '../components/comment';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
 import { formatPrice, formatDate, getDiscountPercent, PLACEHOLDER_BOOK } from '../utils';
 import { Spinner, StarRating, Empty, ErrorMsg } from '../components/common';
 
 export default function BookDetailPage() {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const { wishlistIds, toggle: toggleWishlist } = useWishlist();
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +24,7 @@ export default function BookDetailPage() {
   const [commentCount, setCommentCount] = useState(0);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [togglingWishlist, setTogglingWishlist] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +60,18 @@ export default function BookDetailPage() {
     }
   };
 
+  const handleToggleWishlist = async () => {
+    if (!user || togglingWishlist) return;
+    setTogglingWishlist(true);
+    try {
+      await toggleWishlist(book.id);
+    } catch {
+      // silent
+    } finally {
+      setTogglingWishlist(false);
+    }
+  };
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -73,9 +90,9 @@ export default function BookDetailPage() {
   if (!book) return <div className="max-w-2xl mx-auto px-4 py-16"><ErrorMsg message={error || 'Không tìm thấy tác phẩm cổ điển này.'} /></div>;
 
   const displayPrice = book.discountPrice && book.discountPrice < book.price ? book.discountPrice : book.price;
-  
+
   const discountPercent = getDiscountPercent(book);
-  
+
   const publishedYear = book.publishedDate ? new Date(book.publishedDate).getFullYear() : null;
 
   return (
@@ -138,7 +155,7 @@ export default function BookDetailPage() {
                     <span className="text-[#2C2114]">{book.publisher.name}</span>
                   </p>
                 )}
-                {}
+                { }
                 {publishedYear && (
                   <p className="flex items-center gap-2">
                     <span className="text-[#A8967E] min-w-[100px]">Niên đại XB:</span>
@@ -168,7 +185,7 @@ export default function BookDetailPage() {
                     <span className="text-lg text-[#A8967E] line-through font-medium" style={{ fontFamily: "'Cinzel', serif" }}>
                       {formatPrice(book.price)}
                     </span>
-                    {}
+                    { }
                     {discountPercent > 0 && (
                       <span className="bg-[#8B6508] text-[#FAF5EC] text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wider rounded-[1px]" style={{ fontFamily: "'Cinzel', serif" }}>
                         -{discountPercent}% Tiết giảm
@@ -222,6 +239,34 @@ export default function BookDetailPage() {
                 >
                   {adding ? 'Đang thâu tập...' : added ? '✓ Đã đưa vào Túi Sách!' : '🛒 Thu nhận vào Túi Sách'}
                 </button>
+
+                {/* Wishlist toggle button */}
+                {user && (
+                  <button
+                    id={`detail-wishlist-toggle-${book.id}`}
+                    onClick={handleToggleWishlist}
+                    disabled={togglingWishlist}
+                    className={`h-14 w-14 flex items-center justify-center border-2 rounded-[1px] transition-all duration-300 ${wishlistIds.has(book.id)
+                        ? 'border-red-400 bg-red-50 text-red-500 hover:bg-red-100'
+                        : 'border-[#2C2114]/40 text-stone-400 hover:border-red-400 hover:text-red-400'
+                      }`}
+                    title={wishlistIds.has(book.id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill={wishlistIds.has(book.id) ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
             )}
 

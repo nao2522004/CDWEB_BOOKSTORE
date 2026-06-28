@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
@@ -45,7 +47,21 @@ export default function Navbar() {
           </form>
 
           <div className="flex items-center gap-6">
-
+            <Link to="/profile/wishlist" className="relative p-1.5 text-[#2C2114] hover:text-[#8B6508] transition-all duration-300 group flex items-center">
+              <span className="text-xs font-bold tracking-[0.15em] uppercase hidden lg:inline mr-2.5 border-b border-transparent group-hover:border-[#8B6508]/40 pb-0.5 transition-all" style={{ fontFamily: "'Cinzel', serif" }}>
+                Sách Ưa Thích
+              </span>
+              <div className="relative transition-transform duration-300 group-hover:scale-105">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2.5 bg-[#8B6508] text-[#FAF5EC] text-[9px] font-extrabold rounded-full w-4.5 h-4.5 flex items-center justify-center border border-[#FAF5EC] shadow-sm">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </div>
+            </Link>
             <Link to="/cart" className="relative p-1.5 text-[#2C2114] hover:text-[#8B6508] transition-all duration-300 group flex items-center">
               <span className="text-xs font-bold tracking-[0.15em] uppercase hidden lg:inline mr-2.5 border-b border-transparent group-hover:border-[#8B6508]/40 pb-0.5 transition-all" style={{ fontFamily: "'Cinzel', serif" }}>
                 Túi Sách
