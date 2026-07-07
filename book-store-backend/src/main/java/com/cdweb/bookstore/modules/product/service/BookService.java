@@ -111,6 +111,19 @@ public class BookService {
         return toDTO(book);
     }
 
+    @Transactional(readOnly = true)
+    public BookDTO getBookByIdentifier(String identifier) {
+        Book book;
+        if (identifier.matches("\\d+")) {
+            book = bookRepository.findById(Long.parseLong(identifier))
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách với ID: " + identifier));
+        } else {
+            book = bookRepository.findBySlug(identifier)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách với slug: " + identifier));
+        }
+        return toDTO(book);
+    }
+
     @Transactional
     public BookDTO updateBook(Long id, BookDTO dto) {
         Book book = bookRepository.findById(id)
