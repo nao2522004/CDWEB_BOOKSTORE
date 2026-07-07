@@ -1,14 +1,63 @@
 import { Link } from 'react-router-dom';
 import { formatPrice, getDiscountPercent, PLACEHOLDER_BOOK } from '../../utils';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
+
+function HeartButton({ bookId }) {
+  const { user } = useAuth();
+  const { wishlistIds, toggle } = useWishlist();
+  const [loading, setLoading] = useState(false);
+
+  if (!user) return null;
+
+  const inWishlist = wishlistIds.has(bookId);
+
+  const handleToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (loading) return;
+    setLoading(true);
+    try {
+      await toggle(bookId);
+    } catch {
+      // silent fail
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      id={`wishlist-toggle-${bookId}`}
+      onClick={handleToggle}
+      disabled={loading}
+      className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:scale-110 transition-all duration-200 border border-[#D4C4A8]/50"
+      title={inWishlist ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+    >
+      <svg
+        className={`w-4 h-4 transition-colors ${inWishlist ? 'text-red-500' : 'text-stone-400 hover:text-red-400'}`}
+        fill={inWishlist ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth={1.8}
+        viewBox="0 0 20 20"
+      >
+        <path
+          fillRule="evenodd"
+          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </button>
+  );
+}
 
 export default function BookCard({ book }) {
   const { addItem } = useCart();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
-  
   const discountPercent = getDiscountPercent(book);
 
   const handleAddToCart = async (e) => {
@@ -47,6 +96,9 @@ export default function BookCard({ book }) {
             -{discountPercent}%
           </span>
         )}
+
+        {/* Heart / wishlist toggle button */}
+        <HeartButton bookId={book.id} />
 
         {book.stockQuantity === 0 && (
           <div className="absolute inset-0 bg-[#2C2114]/70 backdrop-blur-[1px] flex items-center justify-center z-20">
