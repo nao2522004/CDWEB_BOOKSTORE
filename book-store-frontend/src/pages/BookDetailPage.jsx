@@ -30,12 +30,16 @@ export default function BookDetailPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [bookRes, revRes, commentCountRes] = await Promise.all([
-          bookAPI.getById(id),
-          reviewAPI.getByBook(id, { page: 1, size: 10 }).catch(() => null),
-          commentAPI.countByBook(id).catch(() => ({ data: 0 })),
+        const bookRes = await bookAPI.getById(id);
+        const resolvedBook = bookRes.data;
+        const realId = resolvedBook.id;
+
+        const [revRes, commentCountRes] = await Promise.all([
+          reviewAPI.getByBook(realId, { page: 1, size: 10 }).catch(() => null),
+          commentAPI.countByBook(realId).catch(() => ({ data: 0 })),
         ]);
-        setBook(bookRes.data);
+
+        setBook(resolvedBook);
         setReviews(revRes?.data);
         setCommentCount(commentCountRes?.data || 0);
       } catch (err) {
@@ -76,8 +80,8 @@ export default function BookDetailPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await reviewAPI.create({ bookId: Number(id), ...reviewForm });
-      const revRes = await reviewAPI.getByBook(id, { page: 1, size: 10 });
+      await reviewAPI.create({ bookId: book.id, ...reviewForm });
+      const revRes = await reviewAPI.getByBook(book.id, { page: 1, size: 10 });
       setReviews(revRes.data);
       setReviewForm({ rating: 5, comment: '' });
     } catch (_) {
@@ -369,7 +373,7 @@ export default function BookDetailPage() {
             )}
 
             {activeTab === 'comments' && (
-              <CommentSection bookId={Number(id)} onCountChange={setCommentCount} />
+              <CommentSection bookId={book.id} onCountChange={setCommentCount} />
             )}
           </div>
         </div>

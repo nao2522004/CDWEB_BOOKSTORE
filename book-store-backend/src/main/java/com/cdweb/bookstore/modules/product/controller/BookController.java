@@ -42,9 +42,9 @@ public class BookController {
         return ApiResponse.created(bookService.createBook(bookDTO), "Tạo sách thành công");
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookDTO>> getBookById(@PathVariable Long id) {
-        return ApiResponse.ok(bookService.getBookById(id));
+    @GetMapping("/{identifier}")
+    public ResponseEntity<ApiResponse<BookDTO>> getBookByIdentifier(@PathVariable String identifier) {
+        return ApiResponse.ok(bookService.getBookByIdentifier(identifier));
     }
 
     @PutMapping("/{id}")

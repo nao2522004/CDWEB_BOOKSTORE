@@ -33,10 +33,14 @@ function WishlistCard({ book, onRemove, onAddToCart }) {
     await onRemove(book.bookId);
   };
 
-  const handleAddToCart = () => {
-    onAddToCart(book);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 1800);
+  const handleAddToCart = async () => {
+    try {
+      await onAddToCart(book);
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 1800);
+    } catch (err) {
+      // Error handled by parent onAddToCart callback
+    }
   };
 
   return (
@@ -128,7 +132,7 @@ function WishlistCard({ book, onRemove, onAddToCart }) {
             : "bg-[#000000] text-[#FAF5EC] hover:bg-[#8B6508]"
             }`}
         >
-          {addedToCart ? "✓ Đã Thêm" : "Add to Bag"}
+          {addedToCart ? "✓ Đã Thêm" : "Thêm vào giỏ hàng"}
         </button>
       </div>
     </div>
@@ -286,7 +290,7 @@ export default function WishlistPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { refresh: refreshWishlistContext } = useWishlist();
 
   // Debounce search input → keyword state
@@ -479,7 +483,18 @@ export default function WishlistPage() {
                       key={book.wishlistId}
                       book={book}
                       onRemove={handleRemove}
-                      onAddToCart={(b) => addToCart(b, 1)}
+                      onAddToCart={async (b) => {
+                        if (!b.bookId) {
+                          alert("Không tìm thấy ID sách.");
+                          return;
+                        }
+                        try {
+                          await addItem(b.bookId, 1);
+                        } catch (err) {
+                          alert(err?.message || "Không thể thêm vào giỏ hàng. Vui lòng thử lại.");
+                          throw err;
+                        }
+                      }}
                     />
                   ))}
                 </div>
