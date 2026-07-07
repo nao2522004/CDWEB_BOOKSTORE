@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -21,12 +22,14 @@ public class BookController {
     public ResponseEntity<ApiResponse<Page<BookDTO>>> getAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        return ApiResponse.ok(bookService.getAllBooks(keyword, categoryId, page, size, sortBy, sortDir));
+        return ApiResponse.ok(bookService.getAllBooks(keyword, categoryId, minPrice, maxPrice, page, size, sortBy, sortDir));
     }
 
     @GetMapping("/all")
@@ -43,6 +46,7 @@ public class BookController {
     public ResponseEntity<ApiResponse<BookDTO>> getBookById(@PathVariable Long id) {
         return ApiResponse.ok(bookService.getBookById(id));
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<BookDTO>> updateBook(
             @PathVariable Long id,

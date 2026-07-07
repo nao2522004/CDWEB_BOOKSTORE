@@ -128,7 +128,7 @@ public class ZaloPayApiService {
     }
 
     public boolean verifyCallback(String data, String mac) {
-        String expectedMac = hmacSha256(zaloPayProperties.getMacKey(), data);
+        String expectedMac = hmacSha256(zaloPayProperties.getRefundKey(), data);
         return expectedMac.equalsIgnoreCase(mac);
     }
 }

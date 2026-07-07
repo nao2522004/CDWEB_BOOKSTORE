@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Repository
@@ -22,10 +23,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b FROM Book b WHERE " +
             "(b.isDeleted IS NULL OR b.isDeleted = false) AND " +
             "(:categoryId IS NULL OR b.category.id = :categoryId) AND " +
+            "(:minPrice IS NULL OR COALESCE(b.discountPrice, b.price) >= :minPrice) AND " +
+            "(:maxPrice IS NULL OR COALESCE(b.discountPrice, b.price) <= :maxPrice) AND " +
             "(:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(b.slug) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Book> searchBooks(@Param("keyword") String keyword, @Param("categoryId") Long categoryId, Pageable pageable);
+    Page<Book> searchBooks(@Param("keyword") String keyword,
+                           @Param("categoryId") Long categoryId,
+                           @Param("minPrice") BigDecimal minPrice,
+                           @Param("maxPrice") BigDecimal maxPrice,
+                           Pageable pageable);
 
     @Modifying
     @Query("UPDATE Book b SET b.stockQuantity = b.stockQuantity - :qty " +

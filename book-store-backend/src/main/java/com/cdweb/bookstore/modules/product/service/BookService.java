@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -86,14 +87,16 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BookDTO> getAllBooks(String keyword, Long categoryId, int page, int size, String sortBy, String sortDir) {
+    public Page<BookDTO> getAllBooks(String keyword, Long categoryId,
+                                     BigDecimal minPrice, BigDecimal maxPrice,
+                                     int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, size, sort);
-        return bookRepository.searchBooks(keyword, categoryId, pageable).map(this::toDTO);
+        return bookRepository.searchBooks(keyword, categoryId, minPrice, maxPrice, pageable).map(this::toDTO);
     }
 
     @Transactional(readOnly = true)
